@@ -388,6 +388,41 @@ exports.addComment = async (req, res) => {
   }
 };
 
+// @desc    Get ticket comments
+// @route   GET /api/v1/tickets/:id/comments
+// @access  Private
+exports.getComments = async (req, res) => {
+  try {
+    const ticket = await Ticket.findByPk(req.params.id);
+
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: 'Ticket not found' });
+    }
+
+    // Check permission
+    const isAuthorized = 
+      req.user.role === 'admin' || 
+      req.user.role === 'it_staff' ||
+      ticket.requesterId === req.user.userId ||
+      ticket.assignedTo === req.user.userId;
+
+    if (!isAuthorized) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+
+    const comments = await TicketComment.findAll({
+      where: { ticketId: req.params.id },
+      include: [{ model: User, as: 'author', attributes: ['id', 'fullName', 'role'] }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({ success: true, data: comments });
+  } catch (error) {
+    console.error('GetComments error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // @desc    Delete ticket
 // @route   DELETE /api/v1/tickets/:id
 // @access  Private (Admin only)

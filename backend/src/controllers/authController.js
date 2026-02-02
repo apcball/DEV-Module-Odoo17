@@ -182,6 +182,85 @@ exports.refresh = async (req, res) => {
   }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/v1/auth/me
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { fullName, department, phone, avatarUrl } = req.body;
+    const user = await User.findByPk(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    await user.update({
+      fullName: fullName || user.fullName,
+      department: department !== undefined ? department : user.department,
+      phone: phone !== undefined ? phone : user.phone,
+      avatarUrl: avatarUrl !== undefined ? avatarUrl : user.avatarUrl
+    });
+
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        department: user.department,
+        phone: user.phone,
+        avatarUrl: user.avatarUrl
+      }
+    });
+  } catch (error) {
+    console.error('UpdateProfile error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Change password
+// @route   POST /api/v1/auth/change-password
+// @access  Private
+exports.changePassword = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findByPk(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check current password
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await user.update({ passwordHash });
+
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('ChangePassword error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // @desc    Logout user
 // @route   POST /api/v1/auth/logout
 // @access  Private
