@@ -1,0 +1,2 @@
+export NOTION_DB_ID=2fa1accf-c6d3-80b9-8ddb-ccb6a2e85270
+export NOTION_API_KEY=ntn_i71942652991zWvG63Md0lZd6xoUDWGGprQ2k1aiGfl5UX
