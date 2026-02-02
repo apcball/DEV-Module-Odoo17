@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>โปรไฟล์ - IT Ticket Request</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .profile-header {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      color: var(--color-white);
+      margin-bottom: var(--space-6);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+    
+    .profile-header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+    
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      background: var(--color-white);
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-3xl);
+      font-weight: var(--font-bold);
+      color: var(--color-primary);
+      flex-shrink: 0;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .profile-info h1 {
+      color: var(--color-white);
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-2);
+    }
+    
+    .profile-info p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: var(--text-base);
+    }
+    
+    .profile-stats {
+      display: flex;
+      gap: var(--space-8);
+      margin-top: var(--space-4);
+    }
+    
+    .profile-stat {
+      text-align: center;
+    }
+    
+    .profile-stat-value {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+    }
+    
+    .profile-stat-label {
+      font-size: var(--text-sm);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .profile-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-6);
+    }
+    
+    .profile-main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    
+    .profile-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    
+    .settings-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    
+    .settings-header {
+      padding: var(--space-4) var(--space-6);
+      background: var(--color-gray-50);
+      border-bottom: 1px solid var(--color-gray-200);
+    }
+    
+    .settings-header h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-semibold);
+    }
+    
+    .settings-body {
+      padding: var(--space-6);
+    }
+    
+    .sidebar-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+    }
+    
+    .sidebar-card-title {
+      font-size: var(--text-sm);
+      font-weight: var(--font-semibold);
+      color: var(--color-gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-4);
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-gray-100);
+    }
+    
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      font-size: var(--text-sm);
+      color: var(--color-gray-500);
+    }
+    
+    .info-value {
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      color: var(--color-gray-900);
+    }
+    
+    .account-status {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--font-medium);
+    }
+    
+    .account-status.active {
+      background: var(--color-success-light);
+      color: var(--color-success);
+    }
+    
+    .account-status.inactive {
+      background: var(--color-gray-200);
+      color: var(--color-gray-600);
+    }
+    
+    .password-section {
+      margin-top: var(--space-6);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--color-gray-200);
+    }
+    
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--color-gray-50);
+      border-radius: var(--radius-md);
+    }
+    
+    .activity-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-white);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .activity-icon svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-gray-500);
+    }
+    
+    .activity-content {
+      flex: 1;
+    }
+    
+    .activity-text {
+      font-size: var(--text-sm);
+      color: var(--color-gray-700);
+    }
+    
+    .activity-time {
+      font-size: var(--text-xs);
+      color: var(--color-gray-500);
+      margin-top: var(--space-1);
+    }
+    
+    @media (max-width: 1024px) {
+      .profile-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .profile-stats {
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .profile-stats {
+        gap: var(--space-4);
+      }
+      
+      .profile-stat-value {
+        font-size: var(--text-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="dashboard.html" class="navbar-brand">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>IT Ticket</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+        </svg>
+        <span>แดชบอร์ด</span>
+      </a>
+      
+      <a href="tickets.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+        </svg>
+        <span>รายการ Ticket</span>
+      </a>
+      
+      <a href="create-ticket.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>สร้าง Ticket</span>
+      </a>
+      
+      <a href="profile.html" class="sidebar-nav-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        <span>โปรไฟล์</span>
+      </a>
+      
+      <hr style="margin: var(--space-4) 0; border: none; border-top: 1px solid var(--color-gray-200);">
+      
+      <a href="#" class="sidebar-nav-item" id="logout-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        <span>ออกจากระบบ</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div id="profile-container">
+      <div class="text-center p-12">
+        <div class="spinner mx-auto"></div>
+        <p class="text-gray-500 mt-4">กำลังโหลด...</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    // Check authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+    
+    let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Load profile
+    async function loadProfile() {
+      try {
+        const [user, dashboard] = await Promise.all([
+          API.Auth.getMe(),
+          API.Reports.getDashboard()
+        ]);
+        
+        currentUser = user;
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        renderProfile(user, dashboard);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        if (error.message.includes('unauthorized')) {
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      }
+    }
+    
+    function renderProfile(user, dashboard) {
+      const html = `
+        <div class="profile-header">
+          <div class="profile-header-content">
+            <div class="profile-avatar">
+              ${user.name.charAt(0).toUpperCase()}
+            </div>
+            <div class="profile-info">
+              <h1>${user.name}</h1>
+              <p>${user.email}</p>
+              
+              <div class="profile-stats">
+                <div class="profile-stat">
+                  <div class="profile-stat-value">${dashboard.totalTickets || 0}</div>
+                  <div class="profile-stat-label">Ticket ทั้งหมด</div>
+                </div>
+                <div class="profile-stat">
+                  <div class="profile-stat-value">${dashboard.openTickets || 0}</div>
+                  <div class="profile-stat-label">กำลังดำเนินการ</div>
+                </div>
+                <div class="profile-stat">
+                  <div class="profile-stat-value">${dashboard.resolvedTickets || 0}</div>
+                  <div class="profile-stat-label">แก้ไขแล้ว</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-content">
+          <div class="profile-main">
+            <!-- Profile Settings -->
+            <div class="settings-card">
+              <div class="settings-header">
+                <h3>ข้อมูลส่วนตัว</h3>
+              </div>
+              
+              <div class="settings-body">
+                <div id="profile-alert"></div>
+                
+                <form id="profile-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">ชื่อ-นามสกุล</label>
+                      <input type="text" id="profile-name" class="form-input" value="${user.name}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label required">อีเมล</label>
+                      <input type="email" id="profile-email" class="form-input" value="${user.email}" required>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">เบอร์โทรศัพท์</label>
+                      <input type="tel" id="profile-phone" class="form-input" value="${user.phone || ''}" placeholder="0812345678">
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">แผนก</label>
+                      <input type="text" id="profile-department" class="form-input" value="${user.department || ''}" placeholder="เช่น IT, HR, การตลาด">
+                    </div>
+                  </div>
+                  
+                  <div class="form-actions" style="padding-top: var(--space-4); border-top: 1px solid var(--color-gray-200);">
+                    <button type="submit" class="btn btn-primary" id="save-profile-btn">
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      บันทึกการเปลี่ยนแปลง
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="settings-card">
+              <div class="settings-header">
+                <h3>เปลี่ยนรหัสผ่าน</h3>
+              </div>
+              
+              <div class="settings-body">
+                <div id="password-alert"></div>
+                
+                <form id="password-form">
+                  <div class="form-group">
+                    <label class="form-label required">รหัสผ่านปัจจุบัน</label>
+                    <input type="password" id="current-password" class="form-input" required>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">รหัสผ่านใหม่</label>
+                      <input type="password" id="new-password" class="form-input" required>
+                      <p class="form-hint">รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร</p>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label required">ยืนยันรหัสผ่านใหม่</label>
+                      <input type="password" id="confirm-password" class="form-input" required>
+                    </div>
+                  </div>
+                  
+                  <div class="form-actions" style="padding-top: var(--space-4); border-top: 1px solid var(--color-gray-200);">
+                    <button type="submit" class="btn btn-primary" id="change-password-btn">
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                      </svg>
+                      เปลี่ยนรหัสผ่าน
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-sidebar">
+            <!-- Account Info -->
+            <div class="sidebar-card">
+              <h4 class="sidebar-card-title">ข้อมูลบัญชี</h4>
+              
+              <div class="info-row">
+                <span class="info-label">บทบาท</span>
+                <span class="badge ${getRoleBadgeClass(user.role)}">${Utils.Status.getRoleDisplayName(user.role)}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">สถานะ</span>
+                <span class="account-status ${user.isActive ? 'active' : 'inactive'}">
+                  ${user.isActive ? '🟢 ใช้งานได้' : '⚪ ไม่ใช้งาน'}
+                </span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">สมัครเมื่อ</span>
+                <span class="info-value">${Utils.Date.formatDate(user.createdAt)}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">เข้าสู่ระบบล่าสุด</span>
+                <span class="info-value">${user.lastLoginAt ? Utils.Date.formatDateTime(user.lastLoginAt) : 'ไม่ระบุ'}</span>
+              </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="sidebar-card">
+              <h4 class="sidebar-card-title">ทางลัด</h4>
+              
+              <div class="flex flex-col gap-2">
+                <a href="tickets.html" class="btn btn-secondary w-full">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  ดู Ticket ของฉัน
+                </a>
+                
+                <a href="create-ticket.html" class="btn btn-secondary w-full">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  สร้าง Ticket ใหม่
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('profile-container').innerHTML = html;
+      
+      // Setup forms
+      setupProfileForm();
+      setupPasswordForm();
+    }
+    
+    function getRoleBadgeClass(role) {
+      const classes = {
+        'admin': 'badge-priority-urgent',
+        'agent': 'badge-info',
+        'user': 'badge-open'
+      };
+      return classes[role] || 'badge-open';
+    }
+    
+    function setupProfileForm() {
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('save-profile-btn');
+        const alertContainer = document.getElementById('profile-alert');
+        
+        Utils.DOM.setButtonLoading(btn, true);
+        
+        try {
+          const userData = {
+            name: document.getElementById('profile-name').value,
+            email: document.getElementById('profile-email').value,
+            phone: document.getElementById('profile-phone').value,
+            department: document.getElementById('profile-department').value
+          };
+          
+          const updatedUser = await API.Auth.updateProfile(userData);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          Utils.DOM.showAlert(alertContainer, 'บันทึกข้อมูลสำเร็จ', 'success');
+        } catch (error) {
+          Utils.DOM.showAlert(alertContainer, error.message, 'danger');
+        } finally {
+          Utils.DOM.setButtonLoading(btn, false);
+        }
+      });
+    }
+    
+    function setupPasswordForm() {
+      document.getElementById('password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('change-password-btn');
+        const alertContainer = document.getElementById('password-alert');
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        if (newPassword !== confirmPassword) {
+          Utils.DOM.showAlert(alertContainer, 'รหัสผ่านใหม่ไม่ตรงกัน', 'danger');
+          return;
+        }
+        
+        if (newPassword.length < 8) {
+          Utils.DOM.showAlert(alertContainer, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร', 'danger');
+          return;
+        }
+        
+        Utils.DOM.setButtonLoading(btn, true);
+        
+        try {
+          await API.Auth.changePassword({
+            currentPassword,
+            newPassword
+          });
+          
+          Utils.DOM.showAlert(alertContainer, 'เปลี่ยนรหัสผ่านสำเร็จ', 'success');
+          e.target.reset();
+        } catch (error) {
+          Utils.DOM.showAlert(alertContainer, error.message, 'danger');
+        } finally {
+          Utils.DOM.setButtonLoading(btn, false);
+        }
+      });
+    }
+    
+    // Logout
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#logout-btn')) {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
+      }
+    });
+    
+    // Initialize
+    loadProfile();
+  </script>
+</body>
+</html>

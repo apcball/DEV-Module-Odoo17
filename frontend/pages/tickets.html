@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รายการ Ticket - IT Ticket Request</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--color-white);
+      border: 1px solid var(--color-gray-200);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-6);
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    
+    .filter-group label {
+      font-size: var(--text-sm);
+      font-weight: var(--font-medium);
+      color: var(--color-gray-600);
+      white-space: nowrap;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+      min-width: 150px;
+    }
+    
+    .search-group {
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    .search-group input {
+      width: 100%;
+    }
+    
+    .tickets-table {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-gray-200);
+      overflow: hidden;
+    }
+    
+    .ticket-row {
+      display: grid;
+      grid-template-columns: 80px 2fr 1fr 120px 120px 100px;
+      gap: var(--space-4);
+      align-items: center;
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--color-gray-100);
+      transition: background var(--transition-fast);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .ticket-row:last-child {
+      border-bottom: none;
+    }
+    
+    .ticket-row:hover {
+      background: var(--color-gray-50);
+    }
+    
+    .ticket-id {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--color-gray-500);
+    }
+    
+    .ticket-info-col {
+      min-width: 0;
+    }
+    
+    .ticket-title {
+      font-weight: var(--font-medium);
+      color: var(--color-gray-900);
+      margin-bottom: var(--space-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .ticket-category {
+      font-size: var(--text-xs);
+      color: var(--color-gray-500);
+    }
+    
+    .ticket-requester {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    
+    .requester-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: var(--color-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      font-weight: var(--font-semibold);
+      flex-shrink: 0;
+    }
+    
+    .requester-name {
+      font-size: var(--text-sm);
+      color: var(--color-gray-700);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .ticket-date {
+      font-size: var(--text-sm);
+      color: var(--color-gray-600);
+    }
+    
+    .ticket-actions {
+      display: flex;
+      gap: var(--space-1);
+      justify-content: flex-end;
+    }
+    
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--color-gray-500);
+      transition: all var(--transition-fast);
+    }
+    
+    .action-btn:hover {
+      background: var(--color-gray-100);
+      color: var(--color-gray-700);
+    }
+    
+    .action-btn.delete:hover {
+      background: var(--color-danger-light);
+      color: var(--color-danger);
+    }
+    
+    .table-header {
+      display: grid;
+      grid-template-columns: 80px 2fr 1fr 120px 120px 100px;
+      gap: var(--space-4);
+      align-items: center;
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-gray-50);
+      border-bottom: 1px solid var(--color-gray-200);
+      font-size: var(--text-xs);
+      font-weight: var(--font-semibold);
+      color: var(--color-gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .empty-state {
+      padding: var(--space-12);
+      text-align: center;
+    }
+    
+    .empty-state-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--color-gray-100);
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-4);
+    }
+    
+    .empty-state-icon svg {
+      width: 40px;
+      height: 40px;
+      color: var(--color-gray-400);
+    }
+    
+    .empty-state h3 {
+      color: var(--color-gray-900);
+      margin-bottom: var(--space-2);
+    }
+    
+    .empty-state p {
+      color: var(--color-gray-500);
+      margin-bottom: var(--space-6);
+    }
+    
+    .pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4);
+      border-top: 1px solid var(--color-gray-200);
+      background: var(--color-gray-50);
+    }
+    
+    .pagination-info {
+      font-size: var(--text-sm);
+      color: var(--color-gray-600);
+    }
+    
+    @media (max-width: 1024px) {
+      .ticket-row,
+      .table-header {
+        grid-template-columns: 60px 2fr 100px 100px;
+      }
+      
+      .ticket-requester,
+      .table-header > *:nth-child(3) {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .filters-bar {
+        flex-direction: column;
+      }
+      
+      .filter-group {
+        width: 100%;
+      }
+      
+      .filter-group select,
+      .filter-group input {
+        width: 100%;
+        min-width: auto;
+      }
+      
+      .ticket-row,
+      .table-header {
+        grid-template-columns: 50px 1fr 80px 40px;
+        gap: var(--space-2);
+      }
+      
+      .ticket-date,
+      .table-header > *:nth-child(4) {
+        display: none;
+      }
+      
+      .ticket-actions {
+        display: none;
+      }
+      
+      .ticket-row {
+        padding: var(--space-3);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="dashboard.html" class="navbar-brand">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>IT Ticket</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+        </svg>
+        <span>แดชบอร์ด</span>
+      </a>
+      
+      <a href="tickets.html" class="sidebar-nav-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+        </svg>
+        <span>รายการ Ticket</span>
+      </a>
+      
+      <a href="create-ticket.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>สร้าง Ticket</span>
+      </a>
+      
+      <a href="profile.html" class="sidebar-nav-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+        <span>โปรไฟล์</span>
+      </a>
+      
+      <hr style="margin: var(--space-4) 0; border: none; border-top: 1px solid var(--color-gray-200);">
+      
+      <a href="#" class="sidebar-nav-item" id="logout-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        <span>ออกจากระบบ</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">รายการ Ticket</h1>
+        <p class="text-gray-500">จัดการและติดตามสถานะ Ticket ทั้งหมด</p>
+      </div>
+      <a href="create-ticket.html" class="btn btn-primary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        สร้าง Ticket ใหม่
+      </a>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-group search-group">
+        <input type="text" id="search-input" class="form-input" placeholder="🔍 ค้นหา Ticket...">
+      </div>
+      
+      <div class="filter-group">
+        <label>สถานะ:</label>
+        <select id="status-filter" class="form-select">
+          <option value="">ทั้งหมด</option>
+          <option value="open">เปิด</option>
+          <option value="in_progress">กำลังดำเนินการ</option>
+          <option value="pending">รอดำเนินการ</option>
+          <option value="resolved">แก้ไขแล้ว</option>
+          <option value="closed">ปิด</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>ความสำคัญ:</label>
+        <select id="priority-filter" class="form-select">
+          <option value="">ทั้งหมด</option>
+          <option value="low">ต่ำ</option>
+          <option value="medium">ปานกลาง</option>
+          <option value="high">สูง</option>
+          <option value="urgent">เร่งด่วน</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>หมวดหมู่:</label>
+        <select id="category-filter" class="form-select">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      
+      <button id="clear-filters" class="btn btn-ghost">ล้างตัวกรอง</button>
+    </div>
+    
+    <!-- Tickets Table -->
+    <div class="tickets-table">
+      <div class="table-header">
+        <span>ID</span>
+        <span>หัวข้อ</span>
+        <span>ผู้แจ้ง</span>
+        <span>วันที่</span>
+        <span>สถานะ</span>
+        <span></span>
+      </div>
+      
+      <div id="tickets-container">
+        <div class="text-center p-6">
+          <div class="spinner mx-auto"></div>
+          <p class="text-gray-500 mt-4">กำลังโหลด...</p>
+        </div>
+      </div>
+      
+      <div class="pagination-container" id="pagination-container">
+        <span class="pagination-info">แสดง <span id="showing-start">0</span>-<span id="showing-end">0</span> จาก <span id="total-count">0</span> รายการ</span>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">ยืนยันการลบ</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>คุณแน่ใจหรือไม่ว่าต้องการลบ Ticket นี้? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">ยกเลิก</button>
+        <button class="btn btn-danger" id="confirm-delete-btn">ลบ</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    // Check authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let currentPage = 1;
+    let totalPages = 1;
+    let ticketsToDelete = null;
+    
+    // Load categories
+    async function loadCategories() {
+      try {
+        const categories = await API.Categories.getCategories();
+        const select = document.getElementById('category-filter');
+        categories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat.id;
+          option.textContent = cat.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+    
+    // Load tickets
+    async function loadTickets(page = 1) {
+      try {
+        const filters = {
+          page,
+          limit: 10,
+          sort: '-createdAt'
+        };
+        
+        // Add filters
+        const search = document.getElementById('search-input').value;
+        const status = document.getElementById('status-filter').value;
+        const priority = document.getElementById('priority-filter').value;
+        const category = document.getElementById('category-filter').value;
+        
+        if (search) filters.search = search;
+        if (status) filters.status = status;
+        if (priority) filters.priority = priority;
+        if (category) filters.categoryId = category;
+        
+        const data = await API.Tickets.getTickets(filters);
+        
+        currentPage = data.pagination.page;
+        totalPages = data.pagination.totalPages;
+        
+        renderTickets(data.tickets || []);
+        renderPagination(data.pagination);
+      } catch (error) {
+        console.error('Error loading tickets:', error);
+        document.getElementById('tickets-container').innerHTML = `
+          <div class="empty-state">
+            <p class="text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+          </div>
+        `;
+      }
+    }
+    
+    function renderTickets(tickets) {
+      const container = document.getElementById('tickets-container');
+      
+      if (tickets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h3>ไม่พบ Ticket</h3>
+            <p>ลองเปลี่ยนตัวกรองหรือสร้าง Ticket ใหม่</p>
+            <a href="create-ticket.html" class="btn btn-primary">สร้าง Ticket ใหม่</a>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = tickets.map(ticket => `
+        <a href="ticket-detail.html?id=${ticket.id}" class="ticket-row">
+          <span class="ticket-id">#${ticket.id.toString().slice(-4)}</span>
+          <div class="ticket-info-col">
+            <div class="ticket-title">${ticket.title}</div>
+            <span class="badge ${Utils.Status.getPriorityBadgeClass(ticket.priority)}">
+              ${Utils.Status.getPriorityDisplayName(ticket.priority)}
+            </span>
+            <span class="ticket-category">${ticket.category?.name || 'ไม่มีหมวดหมู่'}</span>
+          </div>
+          <div class="ticket-requester">
+            <div class="requester-avatar" style="background: ${getAvatarColor(ticket.requester?.name || '?')}">
+              ${(ticket.requester?.name || '?').charAt(0).toUpperCase()}
+            </div>
+            <span class="requester-name">${ticket.requester?.name || 'ไม่ระบุ'}</span>
+          </div>
+          <span class="ticket-date">${Utils.Date.formatDate(ticket.createdAt)}</span>
+          <span class="badge ${Utils.Status.getStatusBadgeClass(ticket.status)}">
+            ${Utils.Status.getStatusDisplayName(ticket.status)}
+          </span>
+          <div class="ticket-actions" onclick="event.preventDefault()">
+            ${user.role === 'admin' || user.id === ticket.requesterId ? `
+              <button class="action-btn delete" onclick="confirmDelete(${ticket.id})" title="ลบ">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            ` : ''}
+          </div>
+        </a>
+      `).join('');
+    }
+    
+    function renderPagination(pagination) {
+      document.getElementById('showing-start').textContent = ((pagination.page - 1) * pagination.limit) + 1;
+      document.getElementById('showing-end').textContent = Math.min(pagination.page * pagination.limit, pagination.total);
+      document.getElementById('total-count').textContent = pagination.total;
+      
+      const paginationEl = document.getElementById('pagination');
+      let html = '';
+      
+      // Previous
+      html += `
+        <button class="page-btn" ${pagination.page === 1 ? 'disabled' : ''} onclick="loadTickets(${pagination.page - 1})">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+      `;
+      
+      // Page numbers
+      const startPage = Math.max(1, pagination.page - 2);
+      const endPage = Math.min(pagination.totalPages, pagination.page + 2);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        html += `
+          <button class="page-btn ${i === pagination.page ? 'active' : ''}" onclick="loadTickets(${i})">
+            ${i}
+          </button>
+        `;
+      }
+      
+      // Next
+      html += `
+        <button class="page-btn" ${pagination.page === pagination.totalPages ? 'disabled' : ''} onclick="loadTickets(${pagination.page + 1})">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      `;
+      
+      paginationEl.innerHTML = html;
+    }
+    
+    function getAvatarColor(name) {
+      const colors = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return colors[Math.abs(hash) % colors.length];
+    }
+    
+    // Delete confirmation
+    function confirmDelete(ticketId) {
+      ticketsToDelete = ticketId;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+    
+    function closeDeleteModal() {
+      ticketsToDelete = null;
+      document.getElementById('delete-modal').classList.remove('active');
+    }
+    
+    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+      if (!ticketsToDelete) return;
+      
+      try {
+        await API.Tickets.deleteTicket(ticketsToDelete);
+        closeDeleteModal();
+        loadTickets(currentPage);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+    
+    // Event listeners
+    document.getElementById('search-input').addEventListener('input', 
+      Utils.DOM.debounce(() => loadTickets(1), 300)
+    );
+    
+    document.getElementById('status-filter').addEventListener('change', () => loadTickets(1));
+    document.getElementById('priority-filter').addEventListener('change', () => loadTickets(1));
+    document.getElementById('category-filter').addEventListener('change', () => loadTickets(1));
+    
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      document.getElementById('status-filter').value = '';
+      document.getElementById('priority-filter').value = '';
+      document.getElementById('category-filter').value = '';
+      loadTickets(1);
+    });
+    
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    });
+    
+    // Initialize
+    loadCategories();
+    loadTickets();
+  </script>
+</body>
+</html>
