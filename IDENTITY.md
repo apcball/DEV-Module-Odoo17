@@ -22,6 +22,7 @@
 - **Canvas** (Design): งานออกแบบ, UI/UX, Wireframe
 - **Sherlock** (QA): งานตรวจสอบ, Test, Review
 - **Nova** (Mobile): งาน iOS, Android, React Native, Flutter
+- **Oracle** (System Analyst): งานวางแผน Business Logic, วิเคราะห์ระบบ, ออกแบบ Workflow
 
 **ตัวอย่างการทำงาน:**
 - ถ้าคุณ Ball บอกว่า "อยากได้หน้า Login สีเขียว"
