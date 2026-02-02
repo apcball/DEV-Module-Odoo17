@@ -1,0 +1,58 @@
+# IT Ticket Request System
+
+ระบบจัดการคำขอ IT Support - สร้างโดยทีม Atlas
+
+## ขั้นตอนการพัฒนา (Workflow)
+
+1. ✅ **Atlas** → Backend/API, Database Schema (เสร็จแล้ว)
+2. ⏳ **Canvas** → UI/UX Design (รอ)
+3. ⏳ **Pixel** → Frontend Development (รอ)
+4. ⏳ **Sherlock** → QA/Testing (รอ)
+
+## โครงสร้างโปรเจกต์
+
+```
+/
+├── backend/          # Backend API (Node.js + Express + PostgreSQL)
+│   ├── src/
+│   │   ├── models/   # Database Models
+│   │   ├── routes/   # API Routes
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   └── utils/
+│   ├── docs/         # API Documentation
+│   └── tests/        # Test files
+├── frontend/         # (รอ Pixel สร้าง)
+└── docs/             # เอกสารโปรเจกต์
+```
+
+## เริ่มต้นใช้งาน
+
+### Backend
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/v1/auth/login | เข้าสู่ระบบ |
+| GET | /api/v1/tickets | ดูรายการ Ticket |
+| POST | /api/v1/tickets | สร้าง Ticket |
+
+ดูรายละเอียดเพิ่มเติมที่ [backend/docs/API.md](backend/docs/API.md)
+
+## Database Schema
+
+ดูรายละเอียดที่ [backend/docs/database-schema.sql](backend/docs/database-schema.sql)
+
+## ทีมงาน
+
+- **Ball** - Project Owner
+- **Atlas** - Backend/API
+- **Canvas** - UI/UX Design
+- **Pixel** - Frontend
+- **Sherlock** - QA/Testing

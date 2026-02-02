@@ -1,58 +1,40 @@
-# IT Ticket Request System
+# AI-DEV Projects
 
-ระบบจัดการคำขอ IT Support - สร้างโดยทีม Atlas
+Repository สำหรับเก็บโปรเจคต่างๆ ที่พัฒนาโดยทีม AI
 
-## ขั้นตอนการพัฒนา (Workflow)
+## 📁 โปรเจคทั้งหมด
 
-1. ✅ **Atlas** → Backend/API, Database Schema (เสร็จแล้ว)
-2. ⏳ **Canvas** → UI/UX Design (รอ)
-3. ⏳ **Pixel** → Frontend Development (รอ)
-4. ⏳ **Sherlock** → QA/Testing (รอ)
+### [IT Ticket Request](./IT%20Ticket%20Request)
+ระบบจัดการคำขอ IT Support แบบครบวงจร
 
-## โครงสร้างโปรเจกต์
+**ทีมพัฒนา:**
+- **Atlas** - Backend Developer
+- **Canvas** - UI/UX Designer  
+- **Pixel** - Frontend Developer
+- **Sherlock** - QA Engineer
+
+**เทคโนโลยี:**
+- Backend: Node.js + Express + PostgreSQL
+- Frontend: HTML + CSS + JavaScript
+- Design: Responsive UI/UX
+
+**สถานะ:** ✅ เสร็จสมบูรณ์ (QA Passed)
+
+---
+
+## 🗂️ โครงสร้าง Repository
 
 ```
-/
-├── backend/          # Backend API (Node.js + Express + PostgreSQL)
-│   ├── src/
-│   │   ├── models/   # Database Models
-│   │   ├── routes/   # API Routes
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   └── utils/
-│   ├── docs/         # API Documentation
-│   └── tests/        # Test files
-├── frontend/         # (รอ Pixel สร้าง)
-└── docs/             # เอกสารโปรเจกต์
+AI-DEV-/
+├── IT Ticket Request/     # โปรเจค IT Ticket
+│   ├── backend/           # Backend API
+│   ├── frontend/          # Frontend Web App
+│   ├── ui-design/         # UI/UX Design Files
+│   ├── reports/           # QA Reports
+│   └── reviews/           # Code Reviews
+└── README.md              # ไฟล์นี้
 ```
 
-## เริ่มต้นใช้งาน
+---
 
-### Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/v1/auth/login | เข้าสู่ระบบ |
-| GET | /api/v1/tickets | ดูรายการ Ticket |
-| POST | /api/v1/tickets | สร้าง Ticket |
-
-ดูรายละเอียดเพิ่มเติมที่ [backend/docs/API.md](backend/docs/API.md)
-
-## Database Schema
-
-ดูรายละเอียดที่ [backend/docs/database-schema.sql](backend/docs/database-schema.sql)
-
-## ทีมงาน
-
-- **Ball** - Project Owner
-- **Atlas** - Backend/API
-- **Canvas** - UI/UX Design
-- **Pixel** - Frontend
-- **Sherlock** - QA/Testing
+*พัฒนาโดยทีม AI Agents ภายใต้การดูแลของคุณ Ball*
