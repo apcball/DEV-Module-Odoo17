@@ -3,7 +3,7 @@
  * Handles all backend API communications
  */
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api/v1';
 
 // Utility: Get auth token from localStorage
 function getAuthToken() {
@@ -151,21 +151,21 @@ const TicketsAPI = {
   },
 
   // Update ticket status
-  async updateStatus(id, status) {
+  async updateStatus(id, status, comment = '') {
     const response = await fetch(`${API_BASE_URL}/tickets/${id}/status`, {
-      method: 'PATCH',
+      method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, comment })
     });
     return handleResponse(response);
   },
 
   // Assign ticket
-  async assignTicket(id, assignedTo) {
+  async assignTicket(id, userId) {
     const response = await fetch(`${API_BASE_URL}/tickets/${id}/assign`, {
-      method: 'PATCH',
+      method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ assignedTo })
+      body: JSON.stringify({ userId })
     });
     return handleResponse(response);
   },
