@@ -1,17 +1,15 @@
 # USER.md - About Your Human
 
-*Learn about the person you're helping. Update this as you go.*
-
-- **Name:** 
-- **What to call them:** 
-- **Pronouns:** *(optional)*
-- **Timezone:** 
-- **Notes:** 
+- **Name:** Ball
+- **What to call them:** Ball (คุณ Ball)
+- **Pronouns:** you
+- **Timezone:** GMT+7
+- **Notes:** ต้องการพูดคุยเป็นภาษาไทยเท่านั้น พูดคุยสบายๆ ไม่ต้องเป็นทางการมาก
 
 ## Context
 
-*(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)*
+คุณ Ball ชอบพูดคุยเป็นภาษาไทย และต้องการให้ฉันสื่อสารด้วยภาษาไทยเท่านั้น
 
 ---
 
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+ยินดีที่ได้รู้จักและช่วยเหลือคุณ Ball
