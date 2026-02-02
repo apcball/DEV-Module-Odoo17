@@ -39,6 +39,7 @@ router.post('/:id/status', statusValidation, ticketController.updateStatus);
 router.post('/:id/assign', authorize('admin', 'it_staff'), ticketController.assignTicket);
 
 // Comments
+router.get('/:id/comments', ticketController.getComments);
 router.post('/:id/comments', commentValidation, ticketController.addComment);
 
 module.exports = router;
