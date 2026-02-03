@@ -4,6 +4,54 @@
     "notion-skill": {
       "version": "1.0.0",
       "installedAt": 1769951069629
+    },
+    "human-optimized-frontend": {
+      "version": "1.0.0",
+      "installedAt": 1770093948033
+    },
+    "ui-audit": {
+      "version": "1.0.1",
+      "installedAt": 1770093955223
+    },
+    "web-design-guidelines": {
+      "version": "1.0.0",
+      "installedAt": 1770093959698
+    },
+    "prd": {
+      "version": "2.0.5",
+      "installedAt": 1770094736971
+    },
+    "architecture-designer": {
+      "version": "0.1.0",
+      "installedAt": 1770094741571
+    },
+    "ask-questions-if-underspecified": {
+      "version": "1.0.0",
+      "installedAt": 1770094745850
+    },
+    "diagram-gen": {
+      "version": "1.0.1",
+      "installedAt": 1770094750566
+    },
+    "odoo-openclaw-skill": {
+      "version": "0.1.0",
+      "installedAt": 1770113097191
+    },
+    "quickbooks": {
+      "version": "1.0.0",
+      "installedAt": 1770116313554
+    },
+    "xero": {
+      "version": "1.0.0",
+      "installedAt": 1770116333152
+    },
+    "finance": {
+      "version": "1.1.2",
+      "installedAt": 1770116335296
+    },
+    "agentledger": {
+      "version": "1.1.1",
+      "installedAt": 1770116338424
     }
   }
 }
