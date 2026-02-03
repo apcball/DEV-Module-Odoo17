@@ -23,8 +23,102 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         ('urgent', 'Urgent')
     ], string='Priority', default='normal')
     
-    # Lines
+    # Wizard State - Controls which view is shown
+    wizard_state = fields.Selection([
+        ('selection', 'Material Selection'),
+        ('preview', 'Preview & Confirm')
+    ], string='Wizard State', default='selection', required=True)
+    
+    # Search and Filter Fields
+    search_term = fields.Char(string='Search Products', placeholder='Search by name or code...')
+    category_filter = fields.Many2one('boq.category', string='Filter by BOQ Category')
+    product_category_filter = fields.Many2one('product.category', string='Filter by Product Category')
+    cost_type_filter = fields.Selection([
+        ('material', 'Material'),
+        ('labor', 'Labor'),
+        ('overhead', 'Overhead'),
+        ('all', 'All Types')
+    ], string='Filter by Cost Type', default='material')
+    
+    # Lines - All BOQ lines available for selection
     line_ids = fields.One2many('boq.material.requisition.wizard.line', 'wizard_id', string='BOQ Lines')
+    
+    # Filtered lines (computed for display)
+    filtered_line_ids = fields.One2many('boq.material.requisition.wizard.line', 'wizard_id', 
+                                        string='Filtered BOQ Lines',
+                                        compute='_compute_filtered_lines',
+                                        readonly=True)
+    
+    # Summary Statistics
+    total_lines_count = fields.Integer(string='Total Lines', compute='_compute_statistics', readonly=True)
+    selected_lines_count = fields.Integer(string='Selected Lines', compute='_compute_statistics', readonly=True)
+    selected_total_quantity = fields.Float(string='Total Requested Quantity', compute='_compute_statistics', readonly=True)
+    selected_total_cost = fields.Float(string='Total Estimated Cost', compute='_compute_statistics', readonly=True, 
+                                       currency_field='currency_id')
+    
+    # Currency for cost display
+    currency_id = fields.Many2one('res.currency', string='Currency', 
+                                 default=lambda self: self.env.company.currency_id)
+    
+    # Group by options
+    group_by = fields.Selection([
+        ('none', 'No Grouping'),
+        ('category', 'Group by BOQ Category'),
+        ('product_category', 'Group by Product Category')
+    ], string='Group By', default='category')
+    
+    # Available categories for quick select
+    available_category_ids = fields.Many2many('boq.category', string='Available Categories', 
+                                             compute='_compute_available_categories')
+    
+    @api.depends('line_ids', 'line_ids.selected')
+    def _compute_statistics(self):
+        for record in self:
+            record.total_lines_count = len(record.line_ids)
+            selected_lines = record.line_ids.filtered('selected')
+            record.selected_lines_count = len(selected_lines)
+            record.selected_total_quantity = sum(selected_lines.mapped('requested_quantity'))
+            record.selected_total_cost = sum(selected_lines.mapped('total_cost'))
+    
+    @api.depends('line_ids', 'search_term', 'category_filter', 'product_category_filter', 
+                 'cost_type_filter', 'group_by')
+    def _compute_filtered_lines(self):
+        for record in self:
+            lines = record.line_ids
+            
+            # Apply search term filter
+            if record.search_term:
+                search_lower = record.search_term.lower()
+                lines = lines.filtered(lambda l: 
+                    search_lower in (l.product_id.name or '').lower() or
+                    search_lower in (l.product_id.default_code or '').lower() or
+                    search_lower in (l.description or '').lower()
+                )
+            
+            # Apply BOQ category filter
+            if record.category_filter:
+                lines = lines.filtered(lambda l: l.boq_line_id.category_id == record.category_filter)
+            
+            # Apply product category filter
+            if record.product_category_filter:
+                lines = lines.filtered(lambda l: l.product_id.categ_id == record.product_category_filter)
+            
+            # Apply cost type filter (currently only material is supported)
+            if record.cost_type_filter == 'material':
+                # All lines have products, so keep all
+                pass
+            
+            # Store result - this is a workaround since we can't actually filter One2many
+            # The view will handle display ordering via context
+            record.filtered_line_ids = lines
+    
+    @api.depends('boq_id')
+    def _compute_available_categories(self):
+        for record in self:
+            if record.boq_id:
+                record.available_category_ids = record.boq_id.category_ids
+            else:
+                record.available_category_ids = False
     
     @api.model
     def default_get(self, fields_list):
@@ -71,6 +165,8 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
                     'requested_quantity': line.remaining_qty,  # Default to remaining quantity
                     'uom_id': line.uom_id.id if line.uom_id else line.product_id.uom_id.id,
                     'estimated_cost': line.unit_cost,
+                    'category_id': line.category_id.id if line.category_id else False,
+                    'product_category_id': line.product_id.categ_id.id if line.product_id.categ_id else False,
                     'selected': False,  # Do not select by default
                 }))
             
@@ -81,8 +177,83 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         
         return res
     
+    def action_select_all(self):
+        """Select all filtered lines"""
+        self.ensure_one()
+        # Select all lines that match current filters
+        for line in self.line_ids:
+            line.selected = True
+        return {'type': 'ir.actions.act_window_close'}
+    
+    def action_deselect_all(self):
+        """Deselect all lines"""
+        self.ensure_one()
+        self.line_ids.write({'selected': False})
+        return {'type': 'ir.actions.act_window_close'}
+    
+    def action_select_by_category(self, category_id=None):
+        """Select all lines in a specific category"""
+        self.ensure_one()
+        if category_id:
+            lines = self.line_ids.filtered(lambda l: l.category_id.id == category_id)
+            lines.write({'selected': True})
+        return {'type': 'ir.actions.act_window_close'}
+    
+    def action_clear_filters(self):
+        """Clear all search filters"""
+        self.ensure_one()
+        self.search_term = False
+        self.category_filter = False
+        self.product_category_filter = False
+        self.cost_type_filter = 'material'
+        return {'type': 'ir.actions.act_window_close'}
+    
+    def action_go_to_preview(self):
+        """Move to preview state"""
+        self.ensure_one()
+        
+        # Validate that at least one line is selected
+        selected_lines = self.line_ids.filtered('selected')
+        if not selected_lines:
+            raise ValidationError(_('Please select at least one BOQ line to create requisition.'))
+        
+        # Check for invalid quantities
+        invalid_lines = selected_lines.filtered(lambda l: l.requested_quantity <= 0)
+        if invalid_lines:
+            raise ValidationError(_('Requested quantity must be greater than zero for all selected lines.'))
+        
+        # Check for lines exceeding remaining quantity
+        exceeding_lines = selected_lines.filtered(lambda l: l.requested_quantity > l.remaining_quantity)
+        if exceeding_lines:
+            # Just warn, don't block - user can proceed if needed
+            pass
+        
+        self.wizard_state = 'preview'
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
+    
+    def action_go_back_to_selection(self):
+        """Go back to selection state"""
+        self.ensure_one()
+        self.wizard_state = 'selection'
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
+    
     def action_create_requisition(self):
         """Create material requisition from selected lines"""
+        self.ensure_one()
         selected_lines = self.line_ids.filtered('selected')
         
         if not selected_lines:
@@ -148,16 +319,28 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
 class BOQMaterialRequisitionWizardLine(models.TransientModel):
     _name = 'boq.material.requisition.wizard.line'
     _description = 'BOQ Material Requisition Wizard Line'
+    _order = 'category_sequence, sequence, id'
 
     wizard_id = fields.Many2one('boq.material.requisition.wizard', string='Wizard', required=True, ondelete='cascade')
     selected = fields.Boolean(string='Select', default=False)
     
+    # Sequence for ordering
+    sequence = fields.Integer(string='Sequence', default=10)
+    category_sequence = fields.Integer(string='Category Sequence', default=10, 
+                                      compute='_compute_category_sequence', store=True)
+    
     # BOQ line information
     boq_line_id = fields.Many2one('boq.line', string='BOQ Line', required=True)
-    product_id = fields.Many2one('product.product', string='Product', required=False)  # Changed to not required
+    product_id = fields.Many2one('product.product', string='Product', required=False)
     description = fields.Text(string='Description', required=True)
-    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', required=False)  # Changed to not required
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure', required=False)
     estimated_cost = fields.Float(string='Estimated Unit Cost')
+    
+    # Category information for grouping
+    category_id = fields.Many2one('boq.category', string='BOQ Category')
+    category_name = fields.Char(string='Category Name', related='category_id.name', readonly=True, store=True)
+    product_category_id = fields.Many2one('product.category', string='Product Category')
+    product_category_name = fields.Char(string='Product Category Name', related='product_category_id.name', readonly=True, store=True)
     
     # Quantity tracking
     boq_quantity = fields.Float(string='BOQ Quantity', readonly=True)
@@ -173,6 +356,14 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
         ('complete', 'Fully Requisitioned')
     ], string='Status', compute='_compute_quantity_status')
     
+    # Display flags
+    has_warning = fields.Boolean(string='Has Warning', compute='_compute_quantity_status', store=False)
+    
+    @api.depends('category_id', 'category_id.sequence')
+    def _compute_category_sequence(self):
+        for record in self:
+            record.category_sequence = record.category_id.sequence if record.category_id else 999
+    
     @api.depends('requested_quantity', 'estimated_cost')
     def _compute_total_cost(self):
         for record in self:
@@ -183,10 +374,13 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
         for record in self:
             if record.remaining_quantity <= 0:
                 record.quantity_status = 'complete'
+                record.has_warning = False
             elif record.requested_quantity > record.remaining_quantity:
                 record.quantity_status = 'exceed'
+                record.has_warning = True
             else:
                 record.quantity_status = 'within'
+                record.has_warning = False
     
     @api.onchange('boq_line_id')
     def _onchange_boq_line_id(self):
@@ -200,6 +394,9 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
             self.requisitioned_quantity = self.boq_line_id.total_requisitioned_qty
             self.remaining_quantity = self.boq_line_id.remaining_qty
             self.requested_quantity = self.boq_line_id.remaining_qty
+            self.category_id = self.boq_line_id.category_id
+            if self.boq_line_id.product_id:
+                self.product_category_id = self.boq_line_id.product_id.categ_id
     
     @api.constrains('requested_quantity')
     def _check_requested_quantity(self):
