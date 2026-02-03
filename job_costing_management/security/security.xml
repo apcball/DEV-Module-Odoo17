@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ============================================ -->
+    <!-- Groups -->
+    <!-- ============================================ -->
+    
+    <record id="group_job_costing_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="base.module_category_manufacturing"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    
+    <record id="group_job_costing_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="base.module_category_manufacturing"/>
+        <field name="implied_ids" eval="[(4, ref('group_job_costing_user'))]"/>
+    </record>
+    
+    <record id="group_job_costing_admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="category_id" ref="base.module_category_manufacturing"/>
+        <field name="implied_ids" eval="[(4, ref('group_job_costing_manager'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+    
+    <!-- ============================================ -->
+    <!-- Record Rules -->
+    <!-- ============================================ -->
+    
+    <!-- Job Costing: Users see jobs they're responsible for or assigned to -->
+    <record id="rule_job_costing_user" model="ir.rule">
+        <field name="name">Job Costing: User Access</field>
+        <field name="model_id" ref="model_job_costing"/>
+        <field name="domain_force">['|', '|',
+            ('user_id', '=', user.id),
+            ('manager_id.user_id', '=', user.id),
+            ('requester_ids.user_id', '=', user.id)
+        ]</field>
+        <field name="groups" eval="[(4, ref('group_job_costing_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Job Costing: Managers see all jobs -->
+    <record id="rule_job_costing_manager" model="ir.rule">
+        <field name="name">Job Costing: Manager Access</field>
+        <field name="model_id" ref="model_job_costing"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_job_costing_manager'))]"/>
+    </record>
+    
+    <!-- Material Requisition: Users see own or department requisitions -->
+    <record id="rule_material_req_user" model="ir.rule">
+        <field name="name">Material Requisition: User Access</field>
+        <field name="model_id" ref="model_material_requisition"/>
+        <field name="domain_force">['|',
+            ('requester_id.user_id', '=', user.id),
+            ('create_uid', '=', user.id)
+        ]</field>
+        <field name="groups" eval="[(4, ref('group_job_costing_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    
+    <!-- Material Requisition: Managers see department requisitions -->
+    <record id="rule_material_req_manager" model="ir.rule">
+        <field name="name">Material Requisition: Manager Access</field>
+        <field name="model_id" ref="model_material_requisition"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_job_costing_manager'))]"/>
+    </record>
+    
+    <!-- Multi-Company Rule -->
+    <record id="rule_job_costing_company" model="ir.rule">
+        <field name="name">Job Costing: Multi-Company</field>
+        <field name="model_id" ref="model_job_costing"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    
+    <record id="rule_material_req_company" model="ir.rule">
+        <field name="name">Material Requisition: Multi-Company</field>
+        <field name="model_id" ref="model_material_requisition"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    
+</odoo>

@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_job_costing_user,Job Costing User,model_job_costing,group_job_costing_user,1,1,1,0
+access_job_costing_manager,Job Costing Manager,model_job_costing,group_job_costing_manager,1,1,1,1
+access_job_costing_line_user,Job Costing Line User,model_job_costing_line,group_job_costing_user,1,1,1,0
+access_job_costing_line_manager,Job Costing Line Manager,model_job_costing_line,group_job_costing_manager,1,1,1,1
+
+access_material_requisition_user,Material Requisition User,model_material_requisition,group_job_costing_user,1,1,1,0
+access_material_requisition_manager,Material Requisition Manager,model_material_requisition,group_job_costing_manager,1,1,1,1
+access_material_requisition_line_user,Material Requisition Line User,model_material_requisition_line,group_job_costing_user,1,1,1,0
+access_material_requisition_line_manager,Material Requisition Line Manager,model_material_requisition_line,group_job_costing_manager,1,1,1,1
+
+access_material_requisition_wizard_user,Material Requisition Wizard User,model_material_requisition_wizard,group_job_costing_user,1,1,1,0
+access_material_requisition_wizard_line_user,Material Requisition Wizard Line User,model_material_requisition_wizard_line,group_job_costing_user,1,1,1,0
+
+access_material_requisition_portal,Material Requisition Portal,model_material_requisition,base.group_portal,1,0,0,0
