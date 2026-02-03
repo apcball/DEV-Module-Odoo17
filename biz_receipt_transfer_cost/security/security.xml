@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Cost Transfer User Group -->
+        <record id="group_cost_transfer_user" model="res.groups">
+            <field name="name">Cost Transfer User</field>
+            <field name="category_id" ref="base.module_category_warehouse_management"/>
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+            <field name="comment">Users with access to Cost Transfer features on Receipt operations</field>
+        </record>
+    </data>
+</odoo>
