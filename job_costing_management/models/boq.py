@@ -14,10 +14,10 @@ class BOQ(models.Model):
                       default=lambda self: _('New'))
     
     # Relations
-    project_id = fields.Many2one('project.project', string='Project', required=True)
-    job_order_id = fields.Many2one('job.order', string='Job Order')
-    job_cost_sheet_id = fields.Many2one('job.cost.sheet', string='Job Cost Sheet')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    project_id = fields.Many2one('project.project', string='Project', required=True, index=True)
+    job_order_id = fields.Many2one('job.order', string='Job Order', index=True)
+    job_cost_sheet_id = fields.Many2one('job.cost.sheet', string='Job Cost Sheet', index=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company, index=True)
     
     # BOQ Information
     title = fields.Char(string='BOQ Title', required=True)
@@ -31,7 +31,7 @@ class BOQ(models.Model):
         ('approved', 'Approved'),
         ('locked', 'Locked'),
         ('cancelled', 'Cancelled')
-    ], string='Status', default='draft', tracking=True)
+    ], string='Status', default='draft', tracking=True, index=True)
     
     # BOQ Lines
     line_ids = fields.One2many('boq.line', 'boq_id', string='BOQ Lines')
@@ -303,6 +303,21 @@ class BOQ(models.Model):
                 skipped_lines.append(line.description)
                 continue  # Skip if already exists
             
+            # FIX ISSUE #3: Also check by product to prevent duplicate overhead costs
+            # when BOQ is processed multiple times
+            product_existing = self.env['job.cost.line'].search([
+                ('cost_sheet_id', '=', self.job_cost_sheet_id.id),
+                ('product_id', '=', line.product_id.id),
+                ('boq_line_id', '=', False)  # Not linked to any BOQ line yet
+            ], limit=1)
+            
+            if product_existing:
+                # Link the existing cost line to this BOQ line instead of creating new
+                product_existing.sudo().write({'boq_line_id': line.id})
+                skipped_lines.append(f"{line.description} (linked to existing)")
+                _logger.info(f"Linked existing cost line {product_existing.id} to BOQ line {line.id}")
+                continue
+            
             cost_line_vals = {
                 'cost_sheet_id': self.job_cost_sheet_id.id,
                 'cost_type': 'material',
@@ -505,7 +520,7 @@ class BOQCategory(models.Model):
 
     name = fields.Char(string='Category Name', required=True)
     sequence = fields.Integer(string='Sequence', default=10)
-    boq_id = fields.Many2one('boq.boq', string='BOQ', required=True, ondelete='cascade')
+    boq_id = fields.Many2one('boq.boq', string='BOQ', required=True, ondelete='cascade', index=True)
     description = fields.Text(string='Description')
     
     # Computed fields
@@ -523,14 +538,14 @@ class BOQLine(models.Model):
     _description = 'BOQ Line'
     _order = 'sequence, id'
 
-    boq_id = fields.Many2one('boq.boq', string='BOQ', required=True, ondelete='cascade')
+    boq_id = fields.Many2one('boq.boq', string='BOQ', required=True, ondelete='cascade', index=True)
     company_id = fields.Many2one('res.company', related='boq_id.company_id', string='Company', store=True, readonly=True)
     sequence = fields.Integer(string='Sequence', default=10)
-    category_id = fields.Many2one('boq.category', string='Category')
+    category_id = fields.Many2one('boq.category', string='Category', index=True)
     
     # Item information
     item_code = fields.Char(string='Item Code')
-    product_id = fields.Many2one('product.product', string='Product', required=True)
+    product_id = fields.Many2one('product.product', string='Product', required=True, index=True)
     description = fields.Text(string='Description', required=True)
     specification = fields.Text(string='Specification')
     
@@ -710,7 +725,7 @@ class BOQTemplate(models.Model):
 
     name = fields.Char(string='Template Name', required=True)
     description = fields.Text(string='Description')
-    job_type_id = fields.Many2one('job.type', string='Job Type')
+    job_type_id = fields.Many2one('job.type', string='Job Type', index=True)
     
     # Template lines
     line_ids = fields.One2many('boq.template.line', 'template_id', string='Template Lines')
@@ -782,12 +797,12 @@ class BOQTemplateLine(models.Model):
     _description = 'BOQ Template Line'
     _order = 'sequence, id'
 
-    template_id = fields.Many2one('boq.template', string='Template', required=True, ondelete='cascade')
+    template_id = fields.Many2one('boq.template', string='Template', required=True, ondelete='cascade', index=True)
     sequence = fields.Integer(string='Sequence', default=10)
     
     # Item information
     item_code = fields.Char(string='Item Code')
-    product_id = fields.Many2one('product.product', string='Product', required=True)
+    product_id = fields.Many2one('product.product', string='Product', required=True, index=True)
     description = fields.Text(string='Description', required=True)
     specification = fields.Text(string='Specification')
     
