@@ -61,7 +61,7 @@
                     <!-- Search and Filter Bar -->
                     <div class="card mb-3 border-info">
                         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                            <span><strong>🔍 Search & Filter Materials</strong></span>
+                            <span><strong>🔍 Search &amp; Filter Materials</strong></span>
                             <button name="action_clear_filters" string="Clear All Filters" type="object" 
                                     class="btn btn-sm btn-light" icon="fa-times"/>
                         </div>
@@ -115,7 +115,7 @@
                             <!-- Group By Options -->
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <label class="form-label me-3">
+                                    <label for="group_by" class="form-label me-3">
                                         <i class="fa fa-object-group"/>
                                         <strong>Group By:</strong>
                                     </label>
@@ -145,7 +145,7 @@
                     
                     <!-- BOQ Lines with Improved UX -->
                     <div class="o_list_view">
-                        <field name="line_ids" mode="tree" context="{'group_by': group_by}">
+                        <field name="line_ids" mode="tree">
                             <tree string="BOQ Lines" editable="bottom" 
                                   decoration-muted="quantity_status == 'complete'"
                                   decoration-warning="quantity_status == 'exceed'"
@@ -176,7 +176,7 @@
                                 <!-- Requested Quantity with Warning -->
                                 <field name="requested_quantity" 
                                        decoration-warning="requested_quantity > remaining_quantity"
-                                       decoration-danger="requested_quantity <= 0"/>
+                                       decoration-danger="requested_quantity &lt;= 0"/>
                                 
                                 <field name="uom_id" options="{'no_create': True}" required="1" optional="show"/>
                                 
@@ -369,7 +369,7 @@
                 <field name="wizard_state" invisible="1"/>
                 
                 <!-- Selection View -->
-                <div attrs="{'invisible': [('wizard_state', '!=', 'selection')]}">
+                <div invisible="wizard_state != 'selection'">
                     <sheet>
                         <div class="oe_title mb-3">
                             <h1 class="d-flex align-items-center">
@@ -381,19 +381,19 @@
                         <!-- BOQ Info -->
                         <div class="row mb-3 bg-light p-3 rounded">
                             <div class="col-md-3">
-                                <label class="small text-muted">BOQ</label>
+                                <span class="small text-muted">BOQ</span>
                                 <div class="fw-bold"><field name="boq_id" readonly="1"/></div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">Project</label>
+                                <span class="small text-muted">Project</span>
                                 <div><field name="project_id" readonly="1"/></div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">Job Order</label>
+                                <span class="small text-muted">Job Order</span>
                                 <div><field name="job_order_id" readonly="1"/></div>
                             </div>
                             <div class="col-md-3">
-                                <label class="small text-muted">Job Cost Sheet</label>
+                                <span class="small text-muted">Job Cost Sheet</span>
                                 <div><field name="job_cost_sheet_id" readonly="1"/></div>
                             </div>
                         </div>
@@ -414,7 +414,7 @@
                         <!-- Search and Filters -->
                         <div class="card mb-3">
                             <div class="card-header bg-info text-white">
-                                <strong>🔍 Search & Filter</strong>
+                                <strong>🔍 Search &amp; Filter</strong>
                                 <button name="action_clear_filters" string="Clear Filters" type="object" 
                                         class="btn btn-sm btn-light float-end" icon="fa-times"/>
                             </div>
@@ -442,7 +442,7 @@
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-12">
-                                        <label class="small text-muted me-2">Group By:</label>
+                                        <label for="group_by" class="small text-muted me-2">Group By:</label>
                                         <field name="group_by" widget="radio" options="{'horizontal': true}"/>
                                     </div>
                                 </div>
@@ -509,10 +509,10 @@
                 </div>
                 
                 <!-- Preview View -->
-                <div attrs="{'invisible': [('wizard_state', '!=', 'preview')]}">
+                <div invisible="wizard_state != 'preview'">
                     <sheet>
                         <div class="oe_title mb-4">
-                            <h1>✅ Review & Confirm</h1>
+                            <h1>✅ Review &amp; Confirm</h1>
                             <p class="text-muted">Review your selection before creating the requisition</p>
                         </div>
                         

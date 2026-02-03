@@ -321,7 +321,7 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
     _description = 'BOQ Material Requisition Wizard Line'
     _order = 'category_sequence, sequence, id'
 
-    wizard_id = fields.Many2one('boq.material.requisition.wizard', string='Wizard', required=True, ondelete='cascade')
+    wizard_id = fields.Many2one('boq.material.requisition.wizard', string='Wizard', required=False, ondelete='cascade')
     selected = fields.Boolean(string='Select', default=False)
     
     # Sequence for ordering
