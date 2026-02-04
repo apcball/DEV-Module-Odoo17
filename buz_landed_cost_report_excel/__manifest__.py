@@ -35,7 +35,7 @@ Excel Column Structure:
     },
     'data': [
         'security/ir.model.access.csv',
-        'wizards/landed_cost_report_wizard_view.xml',
+        'wizard/landed_cost_report_wizard_view.xml',
         'views/landed_cost_report_views.xml',
     ],
     'assets': {

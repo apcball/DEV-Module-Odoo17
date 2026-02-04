@@ -1,6 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_landed_cost_category_user,landed.cost.category.user,model_landed_cost_category,stock.group_stock_user,1,0,0,0
-access_landed_cost_category_manager,landed.cost.category.manager,model_landed_cost_category,stock.group_stock_manager,1,1,1,1
-access_landed_cost_report_wizard,landed.cost.report.wizard.user,model_landed_cost_report_wizard,stock.group_stock_user,1,1,1,1
-access_landed_cost_report,landed.cost.report.user,model_landed_cost_report,stock.group_stock_user,1,1,1,1
-access_landed_cost_report_line,landed.cost.report.line.user,model_landed_cost_report_line,stock.group_stock_user,1,1,1,1
+access_landed_cost_report_wizard_user,landed.cost.report.wizard.user,model_landed_cost_report_wizard,base.group_user,1,1,1,0
+access_landed_cost_report_line_user,landed.cost.report.line.user,model_landed_cost_report_line,base.group_user,1,0,1,0
