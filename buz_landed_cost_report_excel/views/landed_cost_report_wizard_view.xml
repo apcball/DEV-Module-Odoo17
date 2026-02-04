@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Landed Cost Report Wizard Views -->
+    
+    <!-- Form View -->
+    <record id="view_landed_cost_report_wizard_form" model="ir.ui.view">
+        <field name="name">landed.cost.report.wizard.form</field>
+        <field name="model">landed.cost.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Landed Cost Report Wizard">
+                <!-- State field for flow control -->
+                <field name="state" invisible="1"/>
+                <field name="dynamic_column_count" invisible="1"/>
+                <field name="report_id" invisible="1"/>
+                
+                <!-- Parameters State -->
+                <div invisible="state != 'params'">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Landed Cost Report</h1>
+                        </div>
+                        <p class="text-muted">
+                            Generate a detailed landed cost report with dynamic columns for different service types.
+                        </p>
+                        
+                        <group string="Date Range">
+                            <group>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                            </group>
+                            <group>
+                                <field name="include_validated_only"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Filters">
+                            <group>
+                                <field name="landed_cost_ids" 
+                                       domain="[('state', '=', 'done')]"
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"
+                                       context="{'tree_view_ref': 'stock_landed_costs.view_stock_landed_cost_tree'}"/>
+                                
+                                <field name="picking_ids" 
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"/>
+                                
+                                <field name="product_ids"
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"/>
+                            </group>
+                            
+                            <group>
+                                <field name="category_ids"
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"/>
+                                
+                                <field name="vendor_ids"
+                                       widget="many2many_tags"
+                                       options="{'no_create': True}"
+                                       domain="[('supplier_rank', '&gt;', 0)]"/>
+                                
+                                <field name="group_by"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Currency &amp; Exchange Rate"
+                                class="bg-light border rounded p-3 mb-3">
+                            <group>
+                                <field name="company_id" options="{'no_create': True}"/>
+                                <field name="currency_id" options="{'no_create': True}"/>
+                            </group>
+                            
+                            <group>
+                                <field name="use_manual_rate"/>
+                                <field name="exchange_rate" 
+                                       invisible="not use_manual_rate"
+                                       digits="[12,6]"/>
+                            </group>
+                        </group>
+                        
+                        <!-- Dynamic Column Preview -->
+                        <group string="Dynamic Columns Preview" invisible="not dynamic_column_count">
+                            <div class="alert alert-info" role="alert">
+                                <field name="dynamic_column_names" readonly="1"/>
+                            </div>
+                        </group>
+                    </sheet>
+                    
+                    
+                    <footer>
+                        <button name="action_generate_report" 
+                                string="Generate Report" 
+                                type="object"
+                                class="oe_highlight"
+                                icon="fa-play"/>
+                        
+                        <button string="Cancel" 
+                                class="btn-secondary" 
+                                special="cancel"/>
+                    </footer>
+                </div>
+                
+                
+                <!-- Preview State -->
+                <div invisible="state != 'preview'">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Report Preview</h1>
+                        </div>
+                        
+                        <group>
+                            <group>
+                                <field name="date_from" readonly="1"/>
+                                <field name="date_to" readonly="1"/>
+                                <field name="currency_id" readonly="1"/>
+                            </group>
+                            
+                            <group>
+                                <field name="dynamic_column_count" readonly="1"/>
+                                <field name="product_ids" widget="many2many_tags" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Summary">
+                            <field name="report_id" invisible="1"/>
+                            
+                            <group>
+                                <field name="dynamic_column_names" widget="jsonb" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    
+                    
+                    <footer>
+                        <button name="action_preview" 
+                                string="Preview on Screen" 
+                                type="object"
+                                class="oe_highlight"
+                                icon="fa-eye"/>
+                        
+                        <button name="action_export_excel" 
+                                string="Export Excel" 
+                                type="object"
+                                class="btn-primary"
+                                icon="fa-file-excel-o"/>
+                        
+                        <button name="action_back"
+                                string="Back"
+                                type="object"
+                                class="btn-secondary"
+                                icon="fa-arrow-left"/>
+                        
+                        <button string="Close" 
+                                class="btn-secondary" 
+                                special="cancel"/>
+                    </footer>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    
+    <!-- Action -->
+    <record id="action_landed_cost_report_wizard" model="ir.actions.act_window">
+        <field name="name">Landed Cost Report</field>
+        <field name="res_model">landed.cost.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    
+    
+    <!-- Menu Item -->
+    <menuitem id="menu_landed_cost_report_wizard"
+              name="Landed Cost Report"
+              parent="stock_landed_costs.menu_landed_costs"
+              action="action_landed_cost_report_wizard"
+              sequence="10"/>
+    
+    
+    <!-- Report Action for Excel Export -->
+    <record id="action_landed_cost_report_xlsx" model="ir.actions.report">
+        <field name="name">Landed Cost Report Excel</field>
+        <field name="model">landed.cost.report</field>
+        <field name="report_type">xlsx</field>
+        <field name="report_name">buz_landed_cost_report_excel.report_xlsx</field>
+        <field name="report_file">Landed_Cost_Report</field>
+        <field name="print_report_name">'Landed_Cost_Report_' + object.date_from.strftime('%Y%m%d') + '_' + object.date_to.strftime('%Y%m%d') if object.date_from and object.date_to else 'Landed_Cost_Report'</field>
+        <field name="binding_model_id" ref="model_landed_cost_report"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

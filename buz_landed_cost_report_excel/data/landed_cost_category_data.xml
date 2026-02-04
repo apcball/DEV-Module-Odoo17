@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Default Landed Cost Categories -->
+    
+    <!-- Freight &amp; Shipping - Landed 1 -->
+    <record id="landed_cost_category_freight" model="landed.cost.category">
+        <field name="name">Freight &amp; Shipping</field>
+        <field name="code">FREIGHT</field>
+        <field name="sequence">1</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Shipping and freight charges for transporting goods from origin to destination.</field>
+    </record>
+    
+    <!-- Customs Duties - Landed 2 -->
+    <record id="landed_cost_category_customs" model="landed.cost.category">
+        <field name="name">Customs Duties</field>
+        <field name="code">CUSTOMS</field>
+        <field name="sequence">2</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Import duties and customs fees charged by customs authorities.</field>
+    </record>
+    
+    <!-- Insurance - Landed 3 -->
+    <record id="landed_cost_category_insurance" model="landed.cost.category">
+        <field name="name">Insurance</field>
+        <field name="code">INSURANCE</field>
+        <field name="sequence">3</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Cargo insurance and marine insurance for goods in transit.</field>
+    </record>
+    
+    <!-- Handling &amp; Processing - Landed 4 -->
+    <record id="landed_cost_category_handling" model="landed.cost.category">
+        <field name="name">Handling &amp; Processing</field>
+        <field name="code">HANDLING</field>
+        <field name="sequence">4</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Handling fees, processing charges, and documentation fees.</field>
+    </record>
+    
+    <!-- Storage &amp; Warehouse - Landed 5 -->
+    <record id="landed_cost_category_storage" model="landed.cost.category">
+        <field name="name">Storage &amp; Warehouse</field>
+        <field name="code">STORAGE</field>
+        <field name="sequence">5</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Demurrage, detention, and warehouse storage charges.</field>
+    </record>
+    
+    <!-- Agency &amp; Broker Fees - Landed 6 -->
+    <record id="landed_cost_category_agency" model="landed.cost.category">
+        <field name="name">Agency &amp; Broker Fees</field>
+        <field name="code">AGENCY</field>
+        <field name="sequence">6</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Customs broker fees, agency commissions, and forwarding charges.</field>
+    </record>
+    
+    <!-- Bank Charges - Landed 7 -->
+    <record id="landed_cost_category_finance" model="landed.cost.category">
+        <field name="name">Bank Charges</field>
+        <field name="code">FINANCE</field>
+        <field name="sequence">7</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Letter of credit fees, bank commissions, and wire transfer charges.</field>
+    </record>
+    
+    <!-- Other Costs - Landed 8 -->
+    <record id="landed_cost_category_other" model="landed.cost.category">
+        <field name="name">Other Costs</field>
+        <field name="code">OTHER</field>
+        <field name="sequence">8</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Other miscellaneous costs not covered by other categories.</field>
+    </record>
+    
+    <!-- Transit/Transport - Special Column -->
+    <record id="landed_cost_category_transit" model="landed.cost.category">
+        <field name="name">Transit/Transport</field>
+        <field name="code">TRANSIT</field>
+        <field name="sequence">99</field>
+        <field name="is_transit">True</field>
+        <field name="is_tax">False</field>
+        <field name="active">True</field>
+        <field name="description">Inland transportation and transit costs (shown in separate Transit column).</field>
+    </record>
+    
+    <!-- Taxes &amp; Duties - Special Column -->
+    <record id="landed_cost_category_tax" model="landed.cost.category">
+        <field name="name">Taxes &amp; Duties</field>
+        <field name="code">TAX</field>
+        <field name="sequence">99</field>
+        <field name="is_transit">False</field>
+        <field name="is_tax">True</field>
+        <field name="active">True</field>
+        <field name="description">VAT, import taxes, and other tax-related charges (shown in separate Tax column).</field>
+    </record>
+</odoo>

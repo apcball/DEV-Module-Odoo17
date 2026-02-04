@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Security Groups -->
+    
+    <!-- Category for Landed Cost Report -->
+    <record id="module_category_landed_cost_report" model="ir.module.category">
+        <field name="name">Landed Cost Report</field>
+        <field name="description">Landed Cost Report module access rights</field>
+        <field name="sequence">50</field>
+    </record>
+    
+    <!-- Landed Cost Report User Group -->
+    <record id="group_landed_cost_report_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_landed_cost_report"/>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+    </record>
+    
+    <!-- Landed Cost Report Manager Group -->
+    <record id="group_landed_cost_report_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_landed_cost_report"/>
+        <field name="implied_ids" eval="[(4, ref('group_landed_cost_report_user')), (4, ref('stock.group_stock_manager'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+    
+    <!-- Record Rules -->
+    
+    <!-- Multi-company security for Landed Cost Category -->
+    <record id="rule_landed_cost_category_multi_company" model="ir.rule">
+        <field name="name">Landed Cost Category: Multi-Company</field>
+        <field name="model_id" ref="model_landed_cost_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    
+    <!-- Multi-company security for Landed Cost Report -->
+    <record id="rule_landed_cost_report_multi_company" model="ir.rule">
+        <field name="name">Landed Cost Report: Multi-Company</field>
+        <field name="model_id" ref="model_landed_cost_report"/>
+        <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+        <field name="groups" eval="[(4, ref('group_landed_cost_report_user'))]"/>
+    </record>
+    
+    <!-- Multi-company security for Landed Cost Report Line -->
+    <record id="rule_landed_cost_report_line_multi_company" model="ir.rule">
+        <field name="name">Landed Cost Report Line: Multi-Company</field>
+        <field name="model_id" ref="model_landed_cost_report_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+        <field name="groups" eval="[(4, ref('group_landed_cost_report_user'))]"/>
+    </record>
+</odoo>

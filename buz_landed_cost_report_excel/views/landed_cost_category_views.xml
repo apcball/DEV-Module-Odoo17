@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Landed Cost Category Views -->
+    
+    <!-- Tree View -->
+    <record id="view_landed_cost_category_tree" model="ir.ui.view">
+        <field name="name">landed.cost.category.tree</field>
+        <field name="model">landed.cost.category</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="is_transit" decoration-success="is_tax">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="is_transit"/>
+                <field name="is_tax"/>
+                <field name="product_count"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Form View -->
+    <record id="view_landed_cost_category_form" model="ir.ui.view">
+        <field name="name">landed.cost.category.form</field>
+        <field name="model">landed.cost.category</field>
+        <field name="arch" type="xml">
+            <form string="Landed Cost Category">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Category Name..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                            <field name="color" widget="color_picker"/>
+                        </group>
+                        <group>
+                            <field name="is_transit"/>
+                            <field name="is_tax"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                    <group string="Linked Products">
+                        <field name="product_ids" nolabel="1" 
+                               domain="[('landed_cost_ok', '=', True)]"
+                               context="{'default_landed_cost_ok': True}"
+                               options="{'no_create': True}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="view_landed_cost_category_search" model="ir.ui.view">
+        <field name="name">landed.cost.category.search</field>
+        <field name="model">landed.cost.category</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <filter name="transit" string="Transit" domain="[('is_transit', '=', True)]"/>
+                <filter name="tax" string="Tax" domain="[('is_tax', '=', True)]"/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Action -->
+    <record id="action_landed_cost_category" model="ir.actions.act_window">
+        <field name="name">Landed Cost Categories</field>
+        <field name="res_model">landed.cost.category</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_landed_cost_category_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first landed cost category!
+            </p>
+            <p>
+                Categories help organize landed costs into columns in the report.
+                Assign sequence numbers to control column ordering.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Menu Item -->
+    <menuitem id="menu_landed_cost_category"
+              name="Categories"
+              parent="stock_landed_costs.menu_landed_costs"
+              action="action_landed_cost_category"
+              sequence="20"/>
+</odoo>
