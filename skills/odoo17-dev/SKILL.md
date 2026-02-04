@@ -7,6 +7,42 @@ description: Comprehensive Odoo 17 development skill for building custom modules
 
 Complete guide for developing Odoo 17 modules with best practices and patterns.
 
+## ⚠️ Odoo 17 XML Critical Changes
+
+### Deprecated in Odoo 17 (DO NOT USE)
+```xml
+<!-- ❌ attrs is DEPRECATED -->
+<field name="x" attrs="{'invisible': [('state','=','done')]}">
+
+<!-- ❌ states is DEPRECATED -->
+<field name="x" states="draft">
+
+<!-- ❌ colors on tree is DEPRECATED -->
+<tree colors="red:state=='cancelled'">
+```
+
+### Odoo 17 Correct Syntax
+```xml
+<!-- ✅ Use expression-based attributes -->
+<field name="x" invisible="state == 'done'">
+<field name="x" invisible="state in ('draft', 'confirmed')">
+<field name="x" readonly="amount &gt; 1000">
+
+<!-- ✅ Use decoration-* on tree -->
+<tree decoration-danger="state == 'cancelled'">
+```
+
+### XML Escaping Required
+When using comparison operators, escape them:
+| Operator | Escape | Example |
+|----------|--------|---------|
+| `<` | `&lt;` | `amount &lt; 100` |
+| `>` | `&gt;` | `amount &gt; 50` |
+| `<=` | `&lt;=` | `qty &lt;= 10` |
+| `>=` | `&gt;=` | `qty &gt;= 5` |
+
+---
+
 ## Quick Start
 
 ### Module Structure
@@ -367,11 +403,207 @@ def _onchange_partner(self):
         return {'domain': {'contact_id': [('parent_id', '=', self.partner_id.id)]}}
 ```
 
+## Odoo 17 XML Specific Patterns
+
+### Form View with Odoo 17 Syntax
+```xml
+<record id="view_model_form" model="ir.ui.view">
+    <field name="name">my.model.form</field>
+    <field name="model">my.module.model</field>
+    <field name="arch" type="xml">
+        <form string="My Model">
+            <header>
+                <!-- Buttons with Odoo 17 invisible syntax -->
+                <button name="action_confirm" 
+                        string="Confirm" 
+                        type="object" 
+                        class="oe_highlight"
+                        invisible="state != 'draft'"
+                        help="Confirm this record">/>
+                
+                <button name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        invisible="state in ('done', 'cancelled')"
+                        confirm="Are you sure you want to cancel?">/>
+                
+                <!-- Statusbar -->
+                <field name="state" 
+                       widget="statusbar" 
+                       statusbar_visible="draft,confirmed,done"
+                       options="{'clickable': '1'}"/>
+            </header>
+            
+            <sheet>
+                <div class="oe_title">
+                    <h1><field name="name" placeholder="Name..."/></h1>
+                </div>
+                
+                <group>
+                    <group>
+                        <field name="partner_id" 
+                               options="{'no_create': True}"
+                               invisible="state == 'cancelled'">/>
+                        
+                        <field name="date" 
+                               readonly="state != 'draft'">/>
+                        
+                        <field name="amount"
+                               widget="monetary"
+                               readonly="amount &gt; 1000"
+                               decoration-danger="amount &lt; 0"
+                               decoration-success="amount &gt; 0">/>
+                    </group>
+                    
+                    <group>
+                        <field name="user_id"
+                               invisible="not user_has_group('base.group_system')">/>
+                    </group>
+                </group>
+                
+                <notebook>
+                    <page string="Lines" name="lines">
+                        <field name="line_ids" 
+                               invisible="state == 'draft'"
+                               options="{'create': [('state', '=', 'draft')]}">/>
+                    </page>
+                </notebook>
+            </sheet>
+            
+            <div class="oe_chatter">
+                <field name="message_follower_ids"/>
+                <field name="activity_ids"/>
+                <field name="message_ids"/>
+            </div>
+        </form>
+    </field>
+</record>
+```
+
+### Tree View with Odoo 17 Decorations
+```xml
+<record id="view_model_tree" model="ir.ui.view">
+    <field name="name">my.model.tree</field>
+    <field name="model">my.module.model</field>
+    <field name="arch" type="xml">
+        <!-- Odoo 17 uses decoration-* instead of colors -->
+        <tree decoration-muted="state == 'cancelled'"
+              decoration-success="state == 'done'"
+              decoration-info="state == 'draft'"
+              decoration-warning="amount &gt; 1000"
+              decoration-danger="amount &lt; 0"
+              editable="bottom"
+              multi_edit="1">
+            
+            <field name="name">/>
+            
+            <field name="partner_id" optional="show">/>
+            
+            <field name="amount" 
+                   widget="monetary"
+                   decoration-danger="amount &lt; 0">/>
+            
+            
+            <field name="state" 
+                   widget="badge"
+                   decoration-info="state == 'draft'"
+                   decoration-success="state == 'done'"
+                   decoration-muted="state == 'cancelled'">/>
+        
+        </tree>
+    </field>
+</record>
+```
+
+### Search View Odoo 17
+```xml
+<record id="view_model_search" model="ir.ui.view">
+    <field name="name">my.model.search</field>
+    <field name="model">my.module.model</field>
+    <field name="arch" type="xml">
+        <search>
+            <field name="name"/>
+            
+            <field name="partner_id"/>
+            
+            <!-- Filters -->
+            <filter name="draft" 
+                   string="Draft" 
+                   domain="[('state', '=', 'draft')]"/>
+            
+            
+            <filter name="done" 
+                   string="Done" 
+                   domain="[('state', '=', 'done')]"/>
+            
+            
+            <separator/>
+            
+            <!-- Group by -->
+            <group expand="0" string="Group By">
+                <filter name="group_state" 
+                       string="Status"
+                       context="{'group_by': 'state'}"/>
+                
+                
+                <filter name="group_partner" 
+                       string="Partner"
+                       context="{'group_by': 'partner_id'}"/>
+            
+            </group>
+        
+        </search>
+    </field>
+</record>
+```
+
+### Common Odoo 17 XML Pitfalls
+
+#### ❌ Wrong: Using attrs
+```xml
+<!-- This will FAIL in Odoo 17 -->
+<field name="amount" 
+       attrs="{'invisible': [('state', '=', 'done')], 
+               'readonly': [('state', '!=', 'draft')]}"/>
+```
+
+#### ✅ Correct: Expression-based
+```xml
+<field name="amount" 
+       invisible="state == 'done'"
+       readonly="state != 'draft'"/>
+```
+
+#### ❌ Wrong: Unescaped operators
+```xml
+<!-- This will cause XML parse error -->
+<tree decoration-danger="amount > 100">
+```
+
+#### ✅ Correct: Escaped operators
+```xml
+<tree decoration-danger="amount &gt; 100">
+```
+
+#### ❌ Wrong: Using states
+```xml
+<!-- Deprecated in Odoo 17 -->
+<field name="cancel_reason" states="cancelled"/>
+```
+
+#### ✅ Correct: Using invisible
+```xml
+<field name="cancel_reason" invisible="state != 'cancelled'"/>
+```
+
+---
+
 ## References
 
 For detailed information, see:
 - `references/orm_patterns.md` - Advanced ORM patterns
 - `references/view_widgets.md` - Available widgets and their usage
+- `references/xml_attributes_odoo17.md` - Odoo 17 XML attributes (expression-based)
 - `references/security_guide.md` - Complete security implementation
 - `references/wizard_patterns.md` - Advanced wizard patterns
 - `assets/module_template/` - Starter module template
