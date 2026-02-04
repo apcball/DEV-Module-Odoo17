@@ -20,12 +20,13 @@ with the following features:
 Excel Column Structure:
 - Fixed columns: DocNo, Date, RefNo, PrdID, PrdName, QT, PricePerUnit, Cost, Rate, Discount, Exp
 - Dynamic columns: Landed Cost Service columns (from Service Products)
-- Fixed columns: Tax, Transit, CostBath, Cost per unit, InvtName
+- Fixed columns: Tax, Transit, CostBaht, Cost per unit, InvtName
     """,
     'author': 'Buz Software',
     'website': 'https://www.buzsoftware.com',
     'depends': [
         'base',
+        'account',
         'stock',
         'stock_landed_costs',
         'product',
@@ -34,8 +35,11 @@ Excel Column Structure:
         'python': ['xlsxwriter'],
     },
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
+        'data/landed_cost_category_data.xml',
         'wizard/landed_cost_report_wizard_view.xml',
+        'views/landed_cost_category_views.xml',
         'views/landed_cost_report_views.xml',
     ],
     'assets': {

@@ -62,7 +62,7 @@
                                 </th>
                                 <th rowspan="2">Tax</th>
                                 <th rowspan="2">Transit</th>
-                                <th rowspan="2">CostBath</th>
+                                <th rowspan="2">CostBaht</th>
                                 <th rowspan="2">Cost/Unit</th>
                                 <th rowspan="2">InvtName</th>
                             </tr>
@@ -94,7 +94,7 @@
                                     </t>
                                     <td class="text-end" t-esc="row.tax" t-options="{'widget': 'monetary'}"/>
                                     <td class="text-end" t-esc="row.transit" t-options="{'widget': 'monetary'}"/>
-                                    <td class="text-end fw-bold" t-esc="row.cost_bath" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end fw-bold" t-esc="row.cost_baht" t-options="{'widget': 'monetary'}"/>
                                     <td class="text-end" t-esc="row.cost_per_unit" t-options="{'widget': 'monetary'}"/>
                                     <td t-esc="row.invt_name"/>
                                 </tr>
@@ -117,7 +117,7 @@
                                 </t>
                                 <td class="text-end" t-esc="widget.totals.tax" t-options="{'widget': 'monetary'}"/>
                                 <td class="text-end" t-esc="widget.totals.transit" t-options="{'widget': 'monetary'}"/>
-                                <td class="text-end" t-esc="widget.totals.cost_bath" t-options="{'widget': 'monetary'}"/>
+                                <td class="text-end" t-esc="widget.totals.cost_baht" t-options="{'widget': 'monetary'}"/>
                                 <td class="text-end" t-esc="widget.totals.cost_per_unit" t-options="{'widget': 'monetary'}"/>
                                 <td/>
                             </tr>

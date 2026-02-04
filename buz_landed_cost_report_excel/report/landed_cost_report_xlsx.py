@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 
 try:
     import xlsxwriter
+    from xlsxwriter.utility import xl_rowcol_to_cell
     XLSX_AVAILABLE = True
 except ImportError:
     XLSX_AVAILABLE = False
@@ -224,7 +225,7 @@ class LandedCostReportXlsx(models.AbstractModel):
         remaining_headers = [
             ('Tax', 12),
             ('Transit', 12),
-            ('CostBath', 14),
+            ('CostBaht', 14),
             ('Cost per unit', 14),
             ('InvtName', 20),
         ]
@@ -276,8 +277,8 @@ class LandedCostReportXlsx(models.AbstractModel):
             
             # Sum formulas for numeric columns
             for col in range(1, len(all_headers)):
-                start_cell = xlsxwriter.utility.xl_rowcol_to_cell(1, col)
-                end_cell = xlsxwriter.utility.xl_rowcol_to_cell(total_row - 1, col)
+                start_cell = xl_rowcol_to_cell(1, col)
+                end_cell = xl_rowcol_to_cell(total_row - 1, col)
                 
                 # Only sum numeric columns (from QT onwards which is index 5)
                 if col >= 5:

@@ -9,8 +9,8 @@
         <field name="model">landed.cost.report.line</field>
         <field name="arch" type="xml">
             <tree string="Landed Cost Report" 
-                  decoration-muted="cost_bath == 0"
-                  decoration-info="qt > 100"
+                  decoration-muted="cost_baht == 0"
+                  decoration-info="qt &gt; 100"
                   create="false" 
                   edit="false"
                   delete="false"
@@ -31,7 +31,7 @@
                 <!-- Fixed Columns - Right Side -->
                 <field name="tax" sum="Total Tax" optional="show" />
                 <field name="transit" sum="Total Transit" optional="show" />
-                <field name="cost_bath" sum="Total CostBath" />
+                <field name="cost_baht" sum="Total CostBaht" />
                 <field name="cost_per_unit" />
                 <field name="invt_name" optional="show" />
                 
@@ -85,7 +85,7 @@
                         <group>
                             <field name="tax" />
                             <field name="transit" />
-                            <field name="cost_bath" />
+                            <field name="cost_baht" />
                             <field name="cost_per_unit" />
                         </group>
                     </group>
@@ -147,7 +147,7 @@
                     
                     <filter string="Year" 
                             name="group_by_year"
-                            context="{'group_by': 'date:year'}" /
+                            context="{'group_by': 'date:year'}" />
                 </group>
             </search>
         </field>
@@ -164,7 +164,7 @@
                 <field name="prd_name" type="row" />
                 <field name="doc_no" type="row" />
                 <field name="cost" type="measure" />
-                <field name="cost_bath" type="measure" />
+                <field name="cost_baht" type="measure" />
                 <field name="qt" type="measure" />
             </pivot>
         </field>
@@ -179,7 +179,7 @@
         <field name="arch" type="xml">
             <graph string="Landed Cost Analysis" type="bar">
                 <field name="date" interval="month" />
-                <field name="cost_bath" type="measure" />
+                <field name="cost_baht" type="measure" />
             </graph>
         </field>
     </record>

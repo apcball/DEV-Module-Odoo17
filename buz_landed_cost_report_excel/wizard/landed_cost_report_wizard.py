@@ -146,7 +146,7 @@ class LandedCostReportWizard(models.TransientModel):
             'DocNo', 'Date', 'RefNo', 'PrdID', 'PrdName', 
             'QT', 'PricePerUnit', 'Cost', 'Rate', 'Discount', 'Exp'
         ]
-        fixed_headers_right = ['Tax', 'Transit', 'CostBath', 'Cost per unit', 'InvtName']
+        fixed_headers_right = ['Tax', 'Transit', 'CostBaht', 'Cost per unit', 'InvtName']
         
         all_headers = fixed_headers_left + service_columns + fixed_headers_right
         
@@ -367,7 +367,7 @@ class LandedCostReportWizard(models.TransientModel):
         # Fixed columns (right)
         sheet.write(row_idx, col, row_data.get('tax', 0), num_fmt); col += 1
         sheet.write(row_idx, col, row_data.get('transit', 0), num_fmt); col += 1
-        sheet.write(row_idx, col, row_data.get('cost_bath', 0), formats['currency_thb']); col += 1
+        sheet.write(row_idx, col, row_data.get('cost_baht', 0), formats['currency_thb']); col += 1
         sheet.write(row_idx, col, row_data.get('cost_per_unit', 0), formats['currency_thb']); col += 1
         sheet.write(row_idx, col, row_data.get('invt_name', ''), data_fmt); col += 1
 
@@ -420,13 +420,12 @@ class LandedCostReportWizard(models.TransientModel):
         # Right-side columns
         tax_col = service_start_col + len(service_columns)
         transit_col = tax_col + 1
-        cost_bath_col = tax_col + 2
+        cost_baht_col = tax_col + 2
         cost_per_unit_col = tax_col + 3
         
         tax_letter = get_col_letter(tax_col)
         transit_letter = get_col_letter(transit_col)
-        cost_bath_letter = get_col_letter(cost_bath_col)
-        qt_letter_for_calc = get_col_letter(qt_col)
+        cost_baht_letter = get_col_letter(cost_baht_col)
         
         # Tax - sum
         sheet.write_formula(summary_row, tax_col, 
@@ -438,15 +437,15 @@ class LandedCostReportWizard(models.TransientModel):
                           f'=SUM({transit_letter}2:{transit_letter}{last_data_row + 1})', 
                           formats['summary_number'])
         
-        # CostBath - sum
-        sheet.write_formula(summary_row, cost_bath_col, 
-                          f'=SUM({cost_bath_letter}2:{cost_bath_letter}{last_data_row + 1})', 
+        # CostBaht - sum
+        sheet.write_formula(summary_row, cost_baht_col, 
+                          f'=SUM({cost_baht_letter}2:{cost_baht_letter}{last_data_row + 1})', 
                           formats['summary_number'])
         
-        # Cost per unit - average (CostBath / QT)
+        # Cost per unit - average (CostBaht / QT)
         summary_row_1based = summary_row + 1
         sheet.write_formula(summary_row, cost_per_unit_col, 
-                          f'={cost_bath_letter}{summary_row_1based}/{qt_letter}{summary_row_1based}', 
+                          f'={cost_baht_letter}{summary_row_1based}/{qt_letter}{summary_row_1based}', 
                           formats['summary_number'])
 
     def _get_report_data(self, landed_costs):
@@ -518,7 +517,7 @@ class LandedCostReportWizard(models.TransientModel):
             'services': services,
             'tax': 0,  # Placeholder
             'transit': 0,  # Placeholder
-            'cost_bath': final_cost,
+            'cost_baht': final_cost,
             'cost_per_unit': final_cost / quantity if quantity else 0,
             'invt_name': line.move_id.picking_id.name if line.move_id and line.move_id.picking_id else 
                         (line.move_id.name if line.move_id else ''),
@@ -555,7 +554,7 @@ class LandedCostReportWizard(models.TransientModel):
         
         # Header
         fixed_headers_left = ['DocNo', 'Date', 'RefNo', 'PrdID', 'PrdName', 'QT', 'PricePerUnit', 'Cost']
-        fixed_headers_right = ['Tax', 'Transit', 'CostBath', 'Cost per unit', 'InvtName']
+        fixed_headers_right = ['Tax', 'Transit', 'CostBaht', 'Cost per unit', 'InvtName']
         
         html.append('<thead class="table-dark"><tr>')
         for h in fixed_headers_left:
@@ -587,7 +586,7 @@ class LandedCostReportWizard(models.TransientModel):
             
             html.append(f'<td class="text-end">{row.get("tax", 0):,.2f}</td>')
             html.append(f'<td class="text-end">{row.get("transit", 0):,.2f}</td>')
-            html.append(f'<td class="text-end fw-bold">{row.get("cost_bath", 0):,.2f}</td>')
+            html.append(f'<td class="text-end fw-bold">{row.get("cost_baht", 0):,.2f}</td>')
             html.append(f'<td class="text-end">{row.get("cost_per_unit", 0):,.2f}</td>')
             html.append(f'<td>{row.get("invt_name", "")}</td>')
             html.append('</tr>')

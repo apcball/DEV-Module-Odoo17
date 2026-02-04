@@ -1,3 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import landed_cost_report_line
+from . import landed_cost_report
+from . import landed_cost_category
