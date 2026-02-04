@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class BOQ(models.Model):
@@ -17,7 +21,8 @@ class BOQ(models.Model):
     project_id = fields.Many2one('project.project', string='Project', required=True, index=True)
     job_order_id = fields.Many2one('job.order', string='Job Order', index=True)
     job_cost_sheet_id = fields.Many2one('job.cost.sheet', string='Job Cost Sheet', index=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company, index=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, 
+                                 default=lambda self: self.env.company, index=True)
     
     # BOQ Information
     title = fields.Char(string='BOQ Title', required=True)
@@ -65,7 +70,6 @@ class BOQ(models.Model):
     approved_by = fields.Many2one('res.users', string='Approved by')
     approved_date = fields.Date(string='Approved Date')
     
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', string='Currency', 
                                  default=lambda self: self.env.company.currency_id)
     
@@ -108,15 +112,7 @@ class BOQ(models.Model):
         """Create BOQ lines from template lines"""
         BOQLine = self.env['boq.line']
         
-        # Debug logging
-        import logging
-        _logger = logging.getLogger(__name__)
-        _logger.info(f"Creating BOQ lines from template: {template.name}")
-        _logger.info(f"Template has {len(template.line_ids)} lines")
-        
         for template_line in template.line_ids:
-            _logger.info(f"Processing template line: {template_line.description}, Product: {template_line.product_id.name if template_line.product_id else 'None'}")
-            
             line_vals = {
                 'boq_id': self.id,
                 'sequence': template_line.sequence,
@@ -134,19 +130,14 @@ class BOQ(models.Model):
             
             # Validate that essential fields are present
             if not line_vals['description']:
-                _logger.warning(f"Template line {template_line.id} has no description")
+                _logger.debug("Template line %s has no description, skipping", template_line.id)
                 continue
                 
             if not line_vals['uom_id']:
-                _logger.warning(f"Template line {template_line.id} has no UOM")
+                _logger.debug("Template line %s has no UOM, skipping", template_line.id)
                 continue
             
-            new_line = BOQLine.create(line_vals)
-            _logger.info(f"Created BOQ line: {new_line.id}, Product: {new_line.product_id.name if new_line.product_id else 'None'}")
-            
-            # Additional check: if the created line has no product, log it
-            if not new_line.product_id:
-                _logger.warning(f"Created BOQ line {new_line.id} has no product assigned")
+            BOQLine.create(line_vals)
     
     @api.depends('line_ids.quantity', 'line_ids.total_cost')
     def _compute_totals(self):
@@ -269,29 +260,18 @@ class BOQ(models.Model):
     
     def action_create_job_cost_lines(self):
         """Create job cost lines from BOQ"""
-        # Debug logging
-        import logging
-        _logger = logging.getLogger(__name__)
-        _logger.info(f"Creating job cost lines from BOQ: {self.name}")
-        
         if not self.job_cost_sheet_id:
             raise ValidationError(_('Please specify a job cost sheet.'))
-        
-        _logger.info(f"Job cost sheet: {self.job_cost_sheet_id.name}")
         
         # Check if there are any BOQ lines with products
         lines_with_products = self.line_ids.filtered(lambda l: l.product_id)
         if not lines_with_products:
             raise ValidationError(_('No BOQ lines with products found to create job cost lines from.'))
         
-        _logger.info(f"Found {len(lines_with_products)} BOQ lines with products")
-        
         created_lines = []
         skipped_lines = []
         
         for line in lines_with_products:
-            _logger.info(f"Processing BOQ line: {line.description}, Product: {line.product_id.name}")
-            
             # Check if job cost line already exists for this BOQ line
             existing_line = self.env['job.cost.line'].search([
                 ('cost_sheet_id', '=', self.job_cost_sheet_id.id),
@@ -299,7 +279,6 @@ class BOQ(models.Model):
             ], limit=1)
             
             if existing_line:
-                _logger.info(f"Skipping BOQ line {line.id} - job cost line already exists: {existing_line.id}")
                 skipped_lines.append(line.description)
                 continue  # Skip if already exists
             
@@ -315,7 +294,6 @@ class BOQ(models.Model):
                 # Link the existing cost line to this BOQ line instead of creating new
                 product_existing.sudo().write({'boq_line_id': line.id})
                 skipped_lines.append(f"{line.description} (linked to existing)")
-                _logger.info(f"Linked existing cost line {product_existing.id} to BOQ line {line.id}")
                 continue
             
             cost_line_vals = {
@@ -329,14 +307,10 @@ class BOQ(models.Model):
                 'boq_line_id': line.id,  # Link to BOQ line
             }
             
-            _logger.info(f"Creating job cost line with values: {cost_line_vals}")
-            
             try:
                 cost_line = self.env['job.cost.line'].create(cost_line_vals)
                 created_lines.append(cost_line.id)
-                _logger.info(f"Created job cost line: {cost_line.id}")
             except Exception as e:
-                _logger.error(f"Error creating job cost line for {line.description}: {str(e)}")
                 raise ValidationError(_('Error creating job cost line for %s: %s') % (line.description, str(e)))
         
         if not created_lines:
@@ -344,8 +318,6 @@ class BOQ(models.Model):
                 raise ValidationError(_('No new job cost lines were created. The following lines already exist: %s') % ', '.join(skipped_lines))
             else:
                 raise ValidationError(_('No new job cost lines were created. They may already exist.'))
-        
-        _logger.info(f"Successfully created {len(created_lines)} job cost lines")
         
         # Return action to show the created job cost lines
         return {
@@ -460,12 +432,6 @@ class BOQ(models.Model):
         original_lines = self.line_ids
         original_categories = self.category_ids
         
-        # Debug logging
-        import logging
-        _logger = logging.getLogger(__name__)
-        _logger.info(f"Copying BOQ: {self.name}")
-        _logger.info(f"Original BOQ has {len(original_lines)} lines")
-        
         # Copy the BOQ record using standard copy
         new_boq = super(BOQ, self).copy(default)
         
@@ -506,10 +472,8 @@ class BOQ(models.Model):
                 # Reset status and don't copy relations
                 'status': 'pending',
             }
-            new_line = self.env['boq.line'].create(line_vals)
-            _logger.info(f"Created BOQ line copy: {new_line.id}, Product: {new_line.product_id.name if new_line.product_id else 'None'}")
+            self.env['boq.line'].create(line_vals)
         
-        _logger.info(f"BOQ copy completed. New BOQ has {len(new_boq.line_ids)} lines")
         return new_boq
 
 

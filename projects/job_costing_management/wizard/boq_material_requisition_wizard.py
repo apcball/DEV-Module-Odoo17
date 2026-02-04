@@ -40,14 +40,8 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         ('all', 'All Types')
     ], string='Filter by Cost Type', default='material')
     
-    # Lines - All BOQ lines available for selection
+    # Lines - All BOQ lines available for selection (filtered by domain in view)
     line_ids = fields.One2many('boq.material.requisition.wizard.line', 'wizard_id', string='BOQ Lines')
-    
-    # Filtered lines (computed for display)
-    filtered_line_ids = fields.One2many('boq.material.requisition.wizard.line', 'wizard_id', 
-                                        string='Filtered BOQ Lines',
-                                        compute='_compute_filtered_lines',
-                                        readonly=True)
     
     # Summary Statistics
     total_lines_count = fields.Integer(string='Total Lines', compute='_compute_statistics', readonly=True)
@@ -70,7 +64,10 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
     # Available categories for quick select
     available_category_ids = fields.Many2many('boq.category', string='Available Categories', 
                                              compute='_compute_available_categories')
-    
+
+    # Flag to trigger view refresh when filters change
+    filter_version = fields.Integer(string='Filter Version', default=0)
+
     @api.depends('line_ids', 'line_ids.selected')
     def _compute_statistics(self):
         for record in self:
@@ -80,38 +77,6 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
             record.selected_total_quantity = sum(selected_lines.mapped('requested_quantity'))
             record.selected_total_cost = sum(selected_lines.mapped('total_cost'))
     
-    @api.depends('line_ids', 'search_term', 'category_filter', 'product_category_filter', 
-                 'cost_type_filter', 'group_by')
-    def _compute_filtered_lines(self):
-        for record in self:
-            lines = record.line_ids
-            
-            # Apply search term filter
-            if record.search_term:
-                search_lower = record.search_term.lower()
-                lines = lines.filtered(lambda l: 
-                    search_lower in (l.product_id.name or '').lower() or
-                    search_lower in (l.product_id.default_code or '').lower() or
-                    search_lower in (l.description or '').lower()
-                )
-            
-            # Apply BOQ category filter
-            if record.category_filter:
-                lines = lines.filtered(lambda l: l.boq_line_id.category_id == record.category_filter)
-            
-            # Apply product category filter
-            if record.product_category_filter:
-                lines = lines.filtered(lambda l: l.product_id.categ_id == record.product_category_filter)
-            
-            # Apply cost type filter (currently only material is supported)
-            if record.cost_type_filter == 'material':
-                # All lines have products, so keep all
-                pass
-            
-            # Store result - this is a workaround since we can't actually filter One2many
-            # The view will handle display ordering via context
-            record.filtered_line_ids = lines
-    
     @api.depends('boq_id')
     def _compute_available_categories(self):
         for record in self:
@@ -119,6 +84,19 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
                 record.available_category_ids = record.boq_id.category_ids
             else:
                 record.available_category_ids = False
+    
+    # Onchange handlers to refresh view when filters change
+    @api.onchange('search_term', 'category_filter', 'product_category_filter', 'cost_type_filter', 'group_by')
+    def _onchange_filters(self):
+        """Trigger view refresh when filters change by incrementing filter_version.
+        This causes the line_ids to re-evaluate their display_in_wizard field."""
+        self.filter_version = (self.filter_version or 0) + 1
+        # Return a domain update to force the view to refresh the line_ids field
+        return {
+            'value': {
+                'filter_version': self.filter_version,
+            }
+        }
     
     @api.model
     def default_get(self, fields_list):
@@ -178,18 +156,35 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         return res
     
     def action_select_all(self):
-        """Select all filtered lines"""
+        """Select all lines that match current filters"""
         self.ensure_one()
-        # Select all lines that match current filters
+        # Get lines matching current filters
         for line in self.line_ids:
-            line.selected = True
-        return {'type': 'ir.actions.act_window_close'}
+            if line._matches_filters(self):
+                line.selected = True
+        # Return action to refresh the view instead of closing
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
     
     def action_deselect_all(self):
         """Deselect all lines"""
         self.ensure_one()
         self.line_ids.write({'selected': False})
-        return {'type': 'ir.actions.act_window_close'}
+        # Return action to refresh the view instead of closing
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
     
     def action_select_by_category(self, category_id=None):
         """Select all lines in a specific category"""
@@ -197,7 +192,14 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         if category_id:
             lines = self.line_ids.filtered(lambda l: l.category_id.id == category_id)
             lines.write({'selected': True})
-        return {'type': 'ir.actions.act_window_close'}
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
     
     def action_clear_filters(self):
         """Clear all search filters"""
@@ -206,7 +208,18 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         self.category_filter = False
         self.product_category_filter = False
         self.cost_type_filter = 'material'
-        return {'type': 'ir.actions.act_window_close'}
+        self.group_by = 'category'
+        # Increment filter version to trigger display refresh
+        self.filter_version = (self.filter_version or 0) + 1
+        # Return action to refresh the view
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
     
     def action_go_to_preview(self):
         """Move to preview state"""
@@ -221,12 +234,6 @@ class BOQMaterialRequisitionWizard(models.TransientModel):
         invalid_lines = selected_lines.filtered(lambda l: l.requested_quantity <= 0)
         if invalid_lines:
             raise ValidationError(_('Requested quantity must be greater than zero for all selected lines.'))
-        
-        # Check for lines exceeding remaining quantity
-        exceeding_lines = selected_lines.filtered(lambda l: l.requested_quantity > l.remaining_quantity)
-        if exceeding_lines:
-            # Just warn, don't block - user can proceed if needed
-            pass
         
         self.wizard_state = 'preview'
         return {
@@ -321,8 +328,11 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
     _description = 'BOQ Material Requisition Wizard Line'
     _order = 'category_sequence, sequence, id'
 
-    wizard_id = fields.Many2one('boq.material.requisition.wizard', string='Wizard', required=False, ondelete='cascade')
+    wizard_id = fields.Many2one('boq.material.requisition.wizard', string='Wizard', required=True, ondelete='cascade')
     selected = fields.Boolean(string='Select', default=False)
+    
+    # Display flag - computed based on wizard filters
+    display_in_wizard = fields.Boolean(string='Display in Wizard', compute='_compute_display_in_wizard', store=False)
     
     # Sequence for ordering
     sequence = fields.Integer(string='Sequence', default=10)
@@ -358,6 +368,70 @@ class BOQMaterialRequisitionWizardLine(models.TransientModel):
     
     # Display flags
     has_warning = fields.Boolean(string='Has Warning', compute='_compute_quantity_status', store=False)
+    
+    @api.depends('wizard_id.search_term', 'wizard_id.category_filter', 
+                 'wizard_id.product_category_filter', 'wizard_id.cost_type_filter',
+                 'wizard_id.filter_version')
+    def _compute_display_in_wizard(self):
+        """Compute whether this line should be displayed based on wizard filters.
+        The filter_version dependency ensures this recomputes when filters change."""
+        for record in self:
+            wizard = record.wizard_id
+            show = True
+            
+            # Apply search term filter
+            if wizard.search_term:
+                search_lower = wizard.search_term.lower()
+                match = (
+                    search_lower in (record.product_id.name or '').lower() or
+                    search_lower in (record.product_id.default_code or '').lower() or
+                    search_lower in (record.description or '').lower()
+                )
+                show = show and match
+            
+            # Apply BOQ category filter
+            if wizard.category_filter and show:
+                show = show and (record.category_id == wizard.category_filter)
+            
+            # Apply product category filter
+            if wizard.product_category_filter and show:
+                show = show and (record.product_category_id == wizard.product_category_filter)
+            
+            # Apply cost type filter (only material is supported in wizard)
+            if wizard.cost_type_filter != 'all' and show:
+                # For now, all lines are considered 'material' type
+                # This can be extended when cost type is tracked on BOQ lines
+                pass
+            
+            record.display_in_wizard = show
+    
+    def _matches_filters(self, wizard):
+        """Check if this line matches the wizard's current filters.
+        Used for select_all action to only select filtered items."""
+        self.ensure_one()
+        
+        # Apply search term filter
+        if wizard.search_term:
+            search_lower = wizard.search_term.lower()
+            match = (
+                search_lower in (self.product_id.name or '').lower() or
+                search_lower in (self.product_id.default_code or '').lower() or
+                search_lower in (self.description or '').lower()
+            )
+            if not match:
+                return False
+        
+        # Apply BOQ category filter
+        if wizard.category_filter:
+            if self.category_id != wizard.category_filter:
+                return False
+        
+        # Apply product category filter
+        if wizard.product_category_filter:
+            if self.product_category_id != wizard.product_category_filter:
+                return False
+        
+        return True
     
     @api.depends('category_id', 'category_id.sequence')
     def _compute_category_sequence(self):

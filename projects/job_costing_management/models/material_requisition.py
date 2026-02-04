@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class MaterialRequisition(models.Model):
@@ -98,11 +102,6 @@ class MaterialRequisition(models.Model):
             # Remove duplicates
             picking_ids = list(set(picking_ids))
             
-            # Debug: Log the picking count
-            import logging
-            _logger = logging.getLogger(__name__)
-            _logger.info(f"Material Requisition {record.name}: Computed {len(picking_ids)} pickings")
-            
             record.picking_count = len(picking_ids)
     
     def _compute_total_amount(self):
@@ -133,10 +132,66 @@ class MaterialRequisition(models.Model):
         self.write({'state': 'rejected'})
     
     def action_cancel(self):
-        self.write({'state': 'cancelled'})
+        for record in self:
+            # Check for related pickings that are not in cancel/draft state
+            picking_ids = record.line_ids.mapped('picking_ids.id')
+            pickings_by_origin = self.env['stock.picking'].search([('origin', '=', record.name)])
+            picking_ids.extend(pickings_by_origin.ids)
+            picking_ids = list(set(picking_ids))
+            
+            if picking_ids:
+                pickings = self.env['stock.picking'].browse(picking_ids)
+                non_cancellable_pickings = pickings.filtered(
+                    lambda p: p.state not in ['draft', 'cancel']
+                )
+                if non_cancellable_pickings:
+                    raise ValidationError(_(
+                        'Cannot cancel this requisition because the following internal transfers are already in progress:\n%s'
+                    ) % '\n'.join(['- %s (%s)' % (p.name, p.state) for p in non_cancellable_pickings]))
+                # Cancel related draft pickings
+                pickings.filtered(lambda p: p.state == 'draft').action_cancel()
+            
+            # Check for related purchase orders when cancelling from ordered state
+            if record.state == 'ordered':
+                purchase_orders = self.env['purchase.order'].search([('origin', '=', record.name)])
+                if purchase_orders:
+                    non_cancellable_pos = purchase_orders.filtered(
+                        lambda po: po.state not in ['draft', 'cancel']
+                    )
+                    if non_cancellable_pos:
+                        raise ValidationError(_(
+                            'Cannot cancel this requisition because the following purchase orders are already confirmed:\n%s'
+                        ) % '\n'.join(['- %s (%s)' % (po.name, po.state) for po in non_cancellable_pos]))
+                    # Cancel related draft POs
+                    purchase_orders.filtered(lambda po: po.state == 'draft').button_cancel()
+            
+            record.write({'state': 'cancelled'})
     
     def action_reset_to_draft(self):
-        self.write({'state': 'draft'})
+        for record in self:
+            # Check for related purchase orders that are not cancelled
+            purchase_orders = self.env['purchase.order'].search([('origin', '=', record.name)])
+            non_draft_pos = purchase_orders.filtered(lambda po: po.state not in ['draft', 'cancel'])
+            if non_draft_pos:
+                raise ValidationError(_(
+                    'Cannot reset to draft because the following purchase orders are already confirmed:\n%s'
+                ) % '\n'.join(['- %s (%s)' % (po.name, po.state) for po in non_draft_pos]))
+            
+            # Check for related pickings that are not in cancel/draft state
+            picking_ids = record.line_ids.mapped('picking_ids.id')
+            pickings_by_origin = self.env['stock.picking'].search([('origin', '=', record.name)])
+            picking_ids.extend(pickings_by_origin.ids)
+            picking_ids = list(set(picking_ids))
+            
+            if picking_ids:
+                pickings = self.env['stock.picking'].browse(picking_ids)
+                non_draft_pickings = pickings.filtered(lambda p: p.state not in ['draft', 'cancel'])
+                if non_draft_pickings:
+                    raise ValidationError(_(
+                        'Cannot reset to draft because the following internal transfers are already in progress:\n%s'
+                    ) % '\n'.join(['- %s (%s)' % (p.name, p.state) for p in non_draft_pickings]))
+            
+            record.write({'state': 'draft'})
     
     def action_create_purchase_order(self):
         # Check if there are any purchase lines
@@ -312,11 +367,6 @@ class MaterialRequisition(models.Model):
         picking_ids.extend(pickings_by_origin.ids)
         # Remove duplicates
         picking_ids = list(set(picking_ids))
-        
-        # Debug: Log the picking IDs
-        import logging
-        _logger = logging.getLogger(__name__)
-        _logger.info(f"Material Requisition {self.name}: Found {len(picking_ids)} pickings: {picking_ids}")
         
         return {
             'name': 'Internal Transfers',
