@@ -11,7 +11,7 @@ This is the central shared state for the Agent Squad.
 - [ ] (Assigned to: ...)
 
 ## 👀 In Review (QA)
-- [ ] (Assigned to: Sherlock)
+- [ ] (Assigned to: Krapuk)
 
 ## ✅ Done
 - [ ] Squad initialization
@@ -19,4 +19,4 @@ This is the central shared state for the Agent Squad.
 ---
 
 ## 📢 Activity Feed
-- **System:** Squad initialized with 4 agents: Atlas (Backend), Pixel (Frontend), Canvas (Design), Sherlock (QA).
+- **System:** Squad initialized with 4 agents: Suga (Backend), Natjang (Frontend), Meow (Design), Krapuk (QA).

@@ -24,20 +24,20 @@ TEAM_MEMBERS = {
         "folder": "system-analyst",
         "tasks": ["analysis", "specification", "workflow"]
     },
-    "canvas": {
-        "name": "Canvas", 
+    "meow": {
+        "name": "Meow", 
         "role": "UI/UX Designer",
         "folder": "design",
         "tasks": ["design", "wireframe", "mockup"]
     },
-    "atlas": {
-        "name": "Atlas",
+    "suga": {
+        "name": "Suga",
         "role": "Backend Developer", 
         "folder": "backend",
         "tasks": ["api", "database", "server"]
     },
-    "pixel": {
-        "name": "Pixel",
+    "natjang": {
+        "name": "Natjang",
         "role": "Frontend Developer",
         "folder": "frontend", 
         "tasks": ["ui", "dashboard", "webapp"]
@@ -48,8 +48,8 @@ TEAM_MEMBERS = {
         "folder": "mobile",
         "tasks": ["ios", "android", "mobile-app"]
     },
-    "sherlock": {
-        "name": "Sherlock",
+    "krapuk": {
+        "name": "Krapuk",
         "role": "QA Engineer",
         "folder": "qa",
         "tasks": ["testing", "review", "quality-check"]
@@ -126,22 +126,22 @@ This folder contains {desc.lower()} for the project.
 | Member | Role | Folder | Status |
 |--------|------|--------|--------|
 | 🔮 Oracle | System Analyst | `01-specs/` | ⏳ Pending |
-| 🖌️ Canvas | UI/UX Designer | `02-design/` | ⏳ Pending |
-| 🤖 Atlas | Backend Dev | `03-backend/` | ⏳ Pending |
-| 🎨 Pixel | Frontend Dev | `04-frontend/` | ⏳ Pending |
+| 🖌️ Meow | UI/UX Designer | `01-design/` | ⏳ Pending |
+| 🤖 Suga | Backend Dev | `03-backend/` | ⏳ Pending |
+| 🎨 Natjang | Frontend Dev | `04-frontend/` | ⏳ Pending |
 | 📱 Nova | Mobile Dev | `05-mobile/` | ⏳ Pending |
-| 🔍 Sherlock | QA Engineer | `06-qa/` | ⏳ Pending |
+| 🔍 Krapuk | QA Engineer | `06-qa/` | ⏳ Pending |
 
 ## 📁 Folder Structure
 
 ```
 {project_slug}/
 ├── 00-specs/          # System Analysis (Oracle)
-├── 01-design/         # UI/UX Design (Canvas)
-├── 02-backend/        # Backend API (Atlas)
-├── 03-frontend/       # Frontend (Pixel)
+├── 01-design/         # UI/UX Design (Meow)
+├── 02-backend/        # Backend API (Suga)
+├── 03-frontend/       # Frontend (Natjang)
 ├── 04-mobile/         # Mobile Apps (Nova)
-├── 05-qa/             # QA & Testing (Sherlock)
+├── 05-qa/             # QA & Testing (Krapuk)
 ├── 06-deploy/         # Deployment
 ├── docs/              # Documentation
 ├── assets/            # Images & Assets
@@ -151,11 +151,11 @@ This folder contains {desc.lower()} for the project.
 ## 🔄 Workflow
 
 1. **Phase 1**: Oracle analyzes requirements → `00-specs/`
-2. **Phase 2**: Canvas designs UI → `01-design/`
-3. **Phase 3**: Atlas builds backend → `02-backend/`
-4. **Phase 4**: Pixel develops frontend → `03-frontend/`
+2. **Phase 2**: Meow designs UI → `01-design/`
+3. **Phase 3**: Suga builds backend → `02-backend/`
+4. **Phase 4**: Natjang develops frontend → `03-frontend/`
 5. **Phase 5**: Nova creates mobile app → `04-mobile/` (if needed)
-6. **Phase 6**: Sherlock tests → `05-qa/`
+6. **Phase 6**: Krapuk tests → `05-qa/`
 7. **Phase 7**: Deploy → `06-deploy/`
 
 ## 📝 Notes
@@ -285,11 +285,11 @@ def main():
     → Show project status
 
   python3 project_manager.py assign <project-slug> <member>
-    → Assign team member (oracle, canvas, atlas, pixel, nova, sherlock)
+    → Assign team member (oracle, meow, suga, natjang, nova, krapuk)
 
 Examples:
   python3 project_manager.py create "E-commerce Website" "Online store"
-  python3 project_manager.py assign my-project atlas
+  python3 project_manager.py assign my-project suga
         """)
         return
     

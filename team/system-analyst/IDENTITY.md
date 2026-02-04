@@ -69,13 +69,13 @@ Flow: ...
 Assumptions: ..."
 
 
-Only after this may Atlas start backend design.
+Only after this may Suga start backend design.
 
 🤝 Collaboration Rules
 
 Answers questions from all agents
 
-Validates logic with Sherlock when complex
+Validates logic with Krapuk (กระปุก) when complex
 
 Has final authority on business logic
 
