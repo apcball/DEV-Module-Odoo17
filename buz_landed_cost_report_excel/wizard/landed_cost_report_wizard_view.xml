@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View - Landed Cost Report Export -->
+    <record id="view_landed_cost_report_wizard_form" model="ir.ui.view">
+        <field name="name">landed.cost.report.wizard.form</field>
+        <field name="model">landed.cost.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Landed Cost Report Export">
+                <field name="state" invisible="1"/>
+                
+                <!-- Initial State: Parameters -->
+                <div invisible="state != 'draft'">
+                    <group string="Report Parameters">
+                        <group>
+                            <field name="date_from" />
+                            <field name="date_to" />
+                        </group>
+                        
+                        <group>
+                            <field name="company_id" 
+                                   options="{'no_create': True, 'no_edit': True}" />
+                            <field name="include_draft" />
+                        </group>
+                    </group>
+                    
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-info-circle" />
+                        <span>
+                            This report will generate an Excel file with:
+                            <ul>
+                                <li>Fixed columns: DocNo, Date, RefNo, Product details, Quantities, Costs</li>
+                                <li>Dynamic columns for each Landed Cost Service type</li>
+                                <li>Totals row with formulas at the bottom</li>
+                            </ul>
+                        </span>
+                    </div>
+                </div>
+                
+                
+                <!-- Preview State -->
+                <div invisible="state != 'preview'">
+                    <group string="Report Preview">
+                        <field name="preview_data" 
+                               nolabel="1" 
+                               widget="html" 
+                               readonly="1"
+                               options="{'style-inline': true}" />
+                    </group>
+                </div>
+                
+                
+                <!-- Done State -->
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success" role="alert">
+                        <i class="fa fa-check-circle" />
+                        Report generated successfully! The download should start automatically.
+                    </div>
+                </div>
+                
+                
+                <footer>
+                    <!-- Draft State Buttons -->
+                    <button name="action_preview" 
+                            type="object" 
+                            string="Preview on Screen"
+                            class="btn-secondary"
+                            icon="fa-eye"
+                            invisible="state != 'draft'" />
+                    
+                    <button name="action_export_excel" 
+                            type="object" 
+                            string="Export to Excel"
+                            class="btn-primary"
+                            icon="fa-file-excel-o"
+                            invisible="state != 'draft'" />
+                    
+                    <!-- Preview State Buttons -->
+                    <button name="action_export_excel" 
+                            type="object" 
+                            string="Export to Excel"
+                            class="btn-primary"
+                            icon="fa-file-excel-o"
+                            invisible="state != 'preview'" />
+                    
+                    <button name="action_close" 
+                            type="object" 
+                            string="Close"
+                            class="btn-secondary"
+                            invisible="state != 'preview'" />
+                    
+                    <!-- Done State Buttons -->
+                    <button name="action_close" 
+                            type="object" 
+                            string="Close"
+                            class="btn-primary"
+                            invisible="state != 'done'" />
+                    
+                    <button string="Cancel" 
+                            class="btn-secondary" 
+                            special="cancel"
+                            invisible="state != 'draft'" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Wizard -->
+    <record id="action_landed_cost_report_wizard" model="ir.actions.act_window">
+        <field name="name">Export Landed Cost Report</field>
+        <field name="res_model">landed.cost.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock_landed_costs.model_stock_landed_cost"/>
+        <field name="binding_type">action</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_landed_cost_report_root"
+              name="Landed Cost Reports"
+              parent="stock.menu_warehouse_report"
+              sequence="50" />
+    
+    <menuitem id="menu_landed_cost_report_export"
+              name="Export Report"
+              parent="menu_landed_cost_report_root"
+              action="action_landed_cost_report_wizard"
+              sequence="10" />
+</odoo>

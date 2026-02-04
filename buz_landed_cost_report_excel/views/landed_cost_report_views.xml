@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================ -->
+         Tree View - Landed Cost Report Lines
+         Shows landed costs as columns (pivot style)
+         ============================================ -->
+    <record id="view_landed_cost_report_line_tree" model="ir.ui.view">
+        <field name="name">landed.cost.report.line.tree</field>
+        <field name="model">landed.cost.report.line</field>
+        <field name="arch" type="xml">
+            <tree string="Landed Cost Report" 
+                  decoration-muted="cost_baht == 0.0"
+                  decoration-info="qt &gt; 100"
+                  create="false" 
+                  edit="false"
+                  delete="false"
+                  limit="80">
+                <!-- Fixed Columns - Left Side -->
+                <field name="doc_no" />
+                <field name="date" />
+                <field name="ref_no" optional="show" />
+                <field name="prd_id" optional="show" />
+                <field name="prd_name" />
+                <field name="qt" sum="Total QT" />
+                <field name="price_per_unit" />
+                <field name="cost" sum="Total Cost" />
+                <field name="rate" optional="hide" />
+                <field name="discount" sum="Total Discount" optional="show" />
+                <field name="exp" optional="hide" />
+                <!-- Dynamic Service Columns - populated by fields_view_get -->
+                <!-- Fixed Columns - Right Side -->
+                <field name="tax" sum="Total Tax" optional="show" />
+                <field name="transit" sum="Total Transit" optional="show" />
+                <field name="cost_baht" sum="Total CostBaht" />
+                <field name="cost_per_unit" />
+                <field name="invt_name" optional="show" />
+                
+                <!-- Group by options -->
+                <groupby name="doc_no">
+                    <field name="date" />
+                    <field name="ref_no" />
+                </groupby>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+         Form View - Landed Cost Report Line
+         ============================================ -->
+    <record id="view_landed_cost_report_line_form" model="ir.ui.view">
+        <field name="name">landed.cost.report.line.form</field>
+        <field name="model">landed.cost.report.line</field>
+        <field name="arch" type="xml">
+            <form string="Landed Cost Report Line" create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="doc_no" readonly="1" />
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Document Information">
+                            <field name="date" />
+                            <field name="ref_no" />
+                            <field name="invt_name" />
+                        </group>
+                        
+                        <group string="Product Information">
+                            <field name="product_id" />
+                            <field name="prd_id" />
+                            <field name="prd_name" />
+                            <field name="qt" />
+                        </group>
+                    </group>
+                    
+                    <group string="Cost Details">
+                        <group>
+                            <field name="price_per_unit" />
+                            <field name="cost" />
+                            <field name="rate" />
+                            <field name="discount" />
+                        </group>
+                        
+                        <group>
+                            <field name="tax" />
+                            <field name="transit" />
+                            <field name="cost_baht" />
+                            <field name="cost_per_unit" />
+                        </group>
+                    </group>
+                    
+                    <group string="Additional Information">
+                        <field name="exp" />
+                        <field name="company_id" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+         Search View - Landed Cost Report Lines
+         ============================================ -->
+    <record id="view_landed_cost_report_line_search" model="ir.ui.view">
+        <field name="name">landed.cost.report.line.search</field>
+        <field name="model">landed.cost.report.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Landed Cost Report">
+                <field name="doc_no" />
+                <field name="prd_name" />
+                <field name="prd_id" />
+                <field name="ref_no" />
+                <field name="invt_name" />
+                
+                <filters>
+                    <filter string="This Month" 
+                            name="this_month"
+                            domain="[('date', '>=', context_today().strftime('%Y-%m-01'))]" />
+                    
+                    <filter string="Last Month" 
+                            name="last_month"
+                            domain="[('date', '>=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')), 
+                                     ('date', '<', context_today().strftime('%Y-%m-01'))]" />
+                    
+                    <filter string="This Year" 
+                            name="this_year"
+                            domain="[('date', '>=', context_today().strftime('%Y-01-01'))]" />
+                </filters>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Document" 
+                            name="group_by_doc"
+                            context="{'group_by': 'doc_no'}" />
+                    
+                    <filter string="Date" 
+                            name="group_by_date"
+                            context="{'group_by': 'date'}" />
+                    
+                    <filter string="Product" 
+                            name="group_by_product"
+                            context="{'group_by': 'product_id'}" />
+                    
+                    <filter string="Month" 
+                            name="group_by_month"
+                            context="{'group_by': 'date:month'}" />
+                    
+                    <filter string="Year" 
+                            name="group_by_year"
+                            context="{'group_by': 'date:year'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+         Pivot View - Landed Cost Report Analysis
+         ============================================ -->
+    <record id="view_landed_cost_report_line_pivot" model="ir.ui.view">
+        <field name="name">landed.cost.report.line.pivot</field>
+        <field name="model">landed.cost.report.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Landed Cost Analysis" disable_linking="1">
+                <field name="prd_name" type="row" />
+                <field name="doc_no" type="row" />
+                <field name="cost" type="measure" />
+                <field name="cost_baht" type="measure" />
+                <field name="qt" type="measure" />
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+         Graph View - Landed Cost Visualization
+         ============================================ -->
+    <record id="view_landed_cost_report_line_graph" model="ir.ui.view">
+        <field name="name">landed.cost.report.line.graph</field>
+        <field name="model">landed.cost.report.line</field>
+        <field name="arch" type="xml">
+            <graph string="Landed Cost Analysis" type="bar">
+                <field name="date" interval="month" />
+                <field name="cost_baht" type="measure" />
+            </graph>
+        </field>
+    </record>
+
+    <!-- ============================================ -->
+         Action - Landed Cost Report
+         ============================================ -->
+    <record id="action_landed_cost_report_line" model="ir.actions.act_window">
+        <field name="name">Landed Cost Report</field>
+        <field name="res_model">landed.cost.report.line</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_landed_cost_report_line_search" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No landed cost data to display.
+            </p>
+            <p>
+                Use the Export wizard to generate a report from your landed cost records.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_landed_cost_report_view"
+              name="View Report"
+              parent="menu_landed_cost_report_root"
+              action="action_landed_cost_report_line"
+              sequence="20" />
+
+</odoo>

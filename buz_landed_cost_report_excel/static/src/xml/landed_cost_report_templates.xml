@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    
+    <!-- 
+        Landed Cost Report Preview Component
+        Used for on-screen preview of the Excel report data
+    -->
+    <t t-name="LandedCostReport.Preview">
+        <div class="o_landed_cost_preview">
+            <div class="o_landed_cost_preview_header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0">Landed Cost Report Preview</h3>
+                <div class="o_landed_cost_preview_actions">
+                    <button class="btn btn-sm btn-outline-secondary o_btn_refresh">
+                        <i class="fa fa-refresh"/> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-primary o_btn_export ms-2">
+                        <i class="fa fa-file-excel-o"/> Export Excel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="o_landed_cost_preview_content">
+                <div class="o_landed_cost_preview_filters mb-3 p-3 bg-light rounded">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">From Date:</label>
+                            <span t-esc="widget.date_from"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">To Date:</label>
+                            <span t-esc="widget.date_to"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Company:</label>
+                            <span t-esc="widget.company_name"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Records:</label>
+                            <span t-esc="widget.record_count"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="o_landed_cost_preview_table_wrapper table-responsive">
+                    <table class="table table-sm table-bordered table-hover o_landed_cost_table">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th rowspan="2">DocNo</th>
+                                <th rowspan="2">Date</th>
+                                <th rowspan="2">RefNo</th>
+                                <th rowspan="2">PrdID</th>
+                                <th rowspan="2">PrdName</th>
+                                <th rowspan="2">QT</th>
+                                <th rowspan="2">Price/Unit</th>
+                                <th rowspan="2">Cost</th>
+                                <th rowspan="2">Rate</th>
+                                <th rowspan="2">Discount</th>
+                                <th rowspan="2">Exp</th>
+                                <th t-att-colspan="widget.service_columns.length" 
+                                    class="text-center">
+                                    Landed Cost Services
+                                </th>
+                                <th rowspan="2">Tax</th>
+                                <th rowspan="2">Transit</th>
+                                <th rowspan="2">CostBaht</th>
+                                <th rowspan="2">Cost/Unit</th>
+                                <th rowspan="2">InvtName</th>
+                            </tr>
+                            <tr>
+                                <t t-foreach="widget.service_columns" t-as="service">
+                                    <th t-esc="service"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            <t t-foreach="widget.rows" t-as="row">
+                                <tr t-att-class="row_index % 2 == 0 ? '' : 'table-secondary'">
+                                    <td t-esc="row.doc_no"/>
+                                    <td t-esc="row.date"/>
+                                    <td t-esc="row.ref_no"/>
+                                    <td t-esc="row.prd_id"/>
+                                    <td t-esc="row.prd_name"/>
+                                    <td class="text-end" t-esc="row.qt" t-options="{'widget': 'float', 'precision': 0}"/>
+                                    <td class="text-end" t-esc="row.price_per_unit" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end" t-esc="row.cost" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end" t-esc="row.rate" t-options="{'widget': 'float', 'precision': 6}"/>
+                                    <td class="text-end" t-esc="row.discount" t-options="{'widget': 'monetary'}"/>
+                                    <td t-esc="row.exp"/>
+                                    <t t-foreach="widget.service_columns" t-as="service">
+                                        <td class="text-end" 
+                                            t-esc="row.services[service] || 0" 
+                                            t-options="{'widget': 'monetary'}"/>
+                                    </t>
+                                    <td class="text-end" t-esc="row.tax" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end" t-esc="row.transit" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end fw-bold" t-esc="row.cost_baht" t-options="{'widget': 'monetary'}"/>
+                                    <td class="text-end" t-esc="row.cost_per_unit" t-options="{'widget': 'monetary'}"/>
+                                    <td t-esc="row.invt_name"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                        
+                        <tfoot class="table-warning fw-bold">
+                            <tr>
+                                <td colspan="5">TOTAL</td>
+                                <td class="text-end" t-esc="widget.totals.qt"/>
+                                <td/>
+                                <td class="text-end" t-esc="widget.totals.cost" t-options="{'widget': 'monetary'}"/>
+                                <td/>
+                                <td class="text-end" t-esc="widget.totals.discount" t-options="{'widget': 'monetary'}"/>
+                                <td/>
+                                <t t-foreach="widget.service_columns" t-as="service">
+                                    <td class="text-end" 
+                                        t-esc="widget.totals.services[service] || 0" 
+                                        t-options="{'widget': 'monetary'}"/>
+                                </t>
+                                <td class="text-end" t-esc="widget.totals.tax" t-options="{'widget': 'monetary'}"/>
+                                <td class="text-end" t-esc="widget.totals.transit" t-options="{'widget': 'monetary'}"/>
+                                <td class="text-end" t-esc="widget.totals.cost_baht" t-options="{'widget': 'monetary'}"/>
+                                <td class="text-end" t-esc="widget.totals.cost_per_unit" t-options="{'widget': 'monetary'}"/>
+                                <td/>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div t-if="widget.has_more_rows" class="alert alert-info mt-3">
+                    <i class="fa fa-info-circle"/>
+                    Showing <span t-esc="widget.displayed_rows"/> of <span t-esc="widget.total_rows"/> records. 
+                    Export to Excel to see all data.
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
