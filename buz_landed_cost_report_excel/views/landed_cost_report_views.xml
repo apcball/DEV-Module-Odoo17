@@ -9,7 +9,7 @@
         <field name="model">landed.cost.report.line</field>
         <field name="arch" type="xml">
             <tree string="Landed Cost Report" 
-                  decoration-muted="cost_baht == 0"
+                  decoration-muted="cost_baht == 0.0"
                   decoration-info="qt &gt; 100"
                   create="false" 
                   edit="false"
