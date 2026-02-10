@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- 
+        Sequences for Landed Cost Report Module
+        
+        This file is reserved for future sequence definitions.
+        Currently, the module uses the standard stock.landed.cost sequences.
+    -->
+    
+    <!-- Example sequence (commented out for future use):
+    <record id="seq_landed_cost_report" model="ir.sequence">
+        <field name="name">Landed Cost Report</field>
+        <field name="code">landed.cost.report</field>
+        <field name="prefix">LCR/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+        <field name="implementation">standard</field>
+    </record>
+    -->
+</odoo>
